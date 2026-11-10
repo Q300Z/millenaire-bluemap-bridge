@@ -2,8 +2,6 @@ package org.millenaire.bridge.service;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,9 +24,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class MillenaireTranslationService {
 
-    private static final Logger LOGGER = LogManager.getLogger();
     private static final Gson GSON = new Gson();
     private static final Type DICT_TYPE = new TypeToken<Map<String, String>>() {}.getType();
+
+    private static void logDebug(String msg, Object... args) {
+        // Debug logs suppressed in production
+    }
+
+    private static void logWarn(String msg, Object... args) {
+        System.err.println("[MillenaireBridge] WARN: " + String.format(msg.replace("{}", "%s"), args));
+    }
 
     public static final String DEFAULT_LOCALE = "fr_fr";
     public static final String FALLBACK_LOCALE_EN = "en_us";
@@ -97,20 +102,20 @@ public final class MillenaireTranslationService {
         Map<String, String> officialMap = loadJsonResource("/assets/millenaire/lang/" + locale + ".json");
         if (officialMap != null && !officialMap.isEmpty()) {
             merged.putAll(officialMap);
-            LOGGER.debug("Loaded {} official Millénaire translation keys for [{}]", officialMap.size(), locale);
+            logDebug("Loaded {} official Millénaire translation keys for [{}]", officialMap.size(), locale);
         } else {
-            LOGGER.debug("No official Millénaire lang file found for [{}], using overlays/fallbacks", locale);
+            logDebug("No official Millénaire lang file found for [{}], using overlays/fallbacks", locale);
         }
 
         // 2. Load bridge supplementary translation overlay
         Map<String, String> bridgeMap = loadJsonResource("/assets/millenaire_bluemap/lang/" + locale + ".json");
         if (bridgeMap != null && !bridgeMap.isEmpty()) {
             merged.putAll(bridgeMap);
-            LOGGER.debug("Loaded {} bridge supplementary translation keys for [{}]", bridgeMap.size(), locale);
+            logDebug("Loaded {} bridge supplementary translation keys for [{}]", bridgeMap.size(), locale);
         }
 
         if (merged.isEmpty()) {
-            LOGGER.warn("Dictionary for [{}] is empty. Check classpath resources.", locale);
+            logWarn("Dictionary for [{}] is empty. Check classpath resources.", locale);
         }
 
         return Collections.unmodifiableMap(merged);
@@ -134,7 +139,7 @@ public final class MillenaireTranslationService {
                 return map != null ? map : Collections.emptyMap();
             }
         } catch (Exception e) {
-            LOGGER.warn("Failed to load translation resource: {}", resourcePath, e);
+            logWarn("Failed to load translation resource: " + resourcePath + ": " + e.getMessage());
             return Collections.emptyMap();
         }
     }

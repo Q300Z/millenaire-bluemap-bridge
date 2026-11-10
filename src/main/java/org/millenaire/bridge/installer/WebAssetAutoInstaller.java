@@ -36,7 +36,12 @@ public final class WebAssetAutoInstaller {
     private static final String JS_TARGET_NAME = "js/millenaire_panel.js";
     private static final String CSS_TARGET_NAME = "css/millenaire_panel.css";
 
-    private static final String[] EXPORT_LOCALES = new String[] { "fr_fr", "en_us" };
+    public static final String[] EXPORT_LOCALES = new String[] {
+        "ar_sa", "cs_cz", "da_dk", "de_de", "en_us", "es_es", "et_ee", "fr_fr",
+        "hi_in", "hu_hu", "it_it", "ja_jp", "ko_kr", "nb_no", "nl_nl", "pl_pl",
+        "pt_br", "pt_pt", "ru_ru", "sl_si", "sv_se", "th_th", "tr_tr", "uk_ua",
+        "zh_cn", "zh_tw"
+    };
 
     private WebAssetAutoInstaller() {}
 
@@ -123,28 +128,50 @@ public final class WebAssetAutoInstaller {
                     Path canonicalPath = langDir.resolve(locale + ".json");
                     writeIfChanged(canonicalPath, jsonBytes);
 
-                    // Export short alias (e.g. fr.json for fr_fr, en.json for en_us)
-                    String shortAlias = locale.split("_")[0];
+                    // Export short alias without collision
+                    String shortAlias = switch (locale) {
+                        case "pt_br" -> "pt_br";
+                        case "pt_pt" -> "pt";
+                        case "zh_cn" -> "zh";
+                        case "zh_tw" -> "zh_tw";
+                        default -> locale.split("_")[0];
+                    };
                     Path aliasPath = langDir.resolve(shortAlias + ".json");
                     writeIfChanged(aliasPath, jsonBytes);
                 }
             }
 
-            // Export manifest.json
+            // Export manifest.json with all 26 official Millénaire languages
             String manifestJson = """
                 {
                   "default": "fr_fr",
                   "languages": {
-                    "fr_fr": {
-                      "code": "fr_fr",
-                      "name": "Français",
-                      "file": "fr_fr.json"
-                    },
-                    "en_us": {
-                      "code": "en_us",
-                      "name": "English",
-                      "file": "en_us.json"
-                    }
+                    "fr_fr": { "code": "fr_fr", "short": "fr", "name": "Français", "flag": "🇫🇷", "file": "fr_fr.json" },
+                    "en_us": { "code": "en_us", "short": "en", "name": "English", "flag": "🇬🇧", "file": "en_us.json" },
+                    "de_de": { "code": "de_de", "short": "de", "name": "Deutsch", "flag": "🇩🇪", "file": "de_de.json" },
+                    "es_es": { "code": "es_es", "short": "es", "name": "Español", "flag": "🇪🇸", "file": "es_es.json" },
+                    "it_it": { "code": "it_it", "short": "it", "name": "Italiano", "flag": "🇮🇹", "file": "it_it.json" },
+                    "ru_ru": { "code": "ru_ru", "short": "ru", "name": "Русский", "flag": "🇷🇺", "file": "ru_ru.json" },
+                    "zh_cn": { "code": "zh_cn", "short": "zh_cn", "name": "简体中文", "flag": "🇨🇳", "file": "zh_cn.json" },
+                    "zh_tw": { "code": "zh_tw", "short": "zh_tw", "name": "繁體中文", "flag": "🇹🇼", "file": "zh_tw.json" },
+                    "ja_jp": { "code": "ja_jp", "short": "ja", "name": "日本語", "flag": "🇯🇵", "file": "ja_jp.json" },
+                    "ko_kr": { "code": "ko_kr", "short": "ko", "name": "한국어", "flag": "🇰🇷", "file": "ko_kr.json" },
+                    "pt_br": { "code": "pt_br", "short": "pt_br", "name": "Português (Brasil)", "flag": "🇧🇷", "file": "pt_br.json" },
+                    "pt_pt": { "code": "pt_pt", "short": "pt", "name": "Português", "flag": "🇵🇹", "file": "pt_pt.json" },
+                    "pl_pl": { "code": "pl_pl", "short": "pl", "name": "Polski", "flag": "🇵🇱", "file": "pl_pl.json" },
+                    "nl_nl": { "code": "nl_nl", "short": "nl", "name": "Nederlands", "flag": "🇳🇱", "file": "nl_nl.json" },
+                    "uk_ua": { "code": "uk_ua", "short": "uk", "name": "Українська", "flag": "🇺🇦", "file": "uk_ua.json" },
+                    "cs_cz": { "code": "cs_cz", "short": "cs", "name": "Čeština", "flag": "🇨🇿", "file": "cs_cz.json" },
+                    "da_dk": { "code": "da_dk", "short": "da", "name": "Dansk", "flag": "🇩🇰", "file": "da_dk.json" },
+                    "sv_se": { "code": "sv_se", "short": "sv", "name": "Svenska", "flag": "🇸🇪", "file": "sv_se.json" },
+                    "nb_no": { "code": "nb_no", "short": "nb", "name": "Norsk", "flag": "🇳🇴", "file": "nb_no.json" },
+                    "tr_tr": { "code": "tr_tr", "short": "tr", "name": "Türkçe", "flag": "🇹🇷", "file": "tr_tr.json" },
+                    "ar_sa": { "code": "ar_sa", "short": "ar", "name": "العربية", "flag": "🇸🇦", "file": "ar_sa.json" },
+                    "hu_hu": { "code": "hu_hu", "short": "hu", "name": "Magyar", "flag": "🇭🇺", "file": "hu_hu.json" },
+                    "et_ee": { "code": "et_ee", "short": "et", "name": "Eesti", "flag": "🇪🇪", "file": "et_ee.json" },
+                    "sl_si": { "code": "sl_si", "short": "sl", "name": "Slovenščina", "flag": "🇸🇮", "file": "sl_si.json" },
+                    "th_th": { "code": "th_th", "short": "th", "name": "ไทย", "flag": "🇹🇭", "file": "th_th.json" },
+                    "hi_in": { "code": "hi_in", "short": "hi", "name": "हिन्दी", "flag": "🇮🇳", "file": "hi_in.json" }
                   }
                 }
                 """;
@@ -167,8 +194,8 @@ public final class WebAssetAutoInstaller {
                 String json = gson.toJson(merged);
                 return json.getBytes(StandardCharsets.UTF_8);
             }
-        } catch (Throwable t) {
-            logWarn("Could not dynamically resolve merged dictionary via MillenaireTranslationService: " + t.getMessage());
+        } catch (Throwable ignored) {
+            // Standalone CLI execution without Minecraft runtime / Gson, fallback to direct bundled resource
         }
 
         // Fallback: load directly from bundled bridge resource

@@ -520,7 +520,31 @@
             this.initialized = false;
             this.supportedLocales = {
                 "fr": { code: "fr", name: "Français", flag: "🇫🇷", file: "fr.json" },
-                "en": { code: "en", name: "English", flag: "🇬🇧", file: "en.json" }
+                "en": { code: "en", name: "English", flag: "🇬🇧", file: "en.json" },
+                "de": { code: "de", name: "Deutsch", flag: "🇩🇪", file: "de.json" },
+                "es": { code: "es", name: "Español", flag: "🇪🇸", file: "es.json" },
+                "it": { code: "it", name: "Italiano", flag: "🇮🇹", file: "it.json" },
+                "ru": { code: "ru", name: "Русский", flag: "🇷🇺", file: "ru.json" },
+                "zh": { code: "zh", name: "简体中文", flag: "🇨🇳", file: "zh.json" },
+                "zh-tw": { code: "zh-tw", name: "繁體中文", flag: "🇹🇼", file: "zh_tw.json" },
+                "ja": { code: "ja", name: "日本語", flag: "🇯🇵", file: "ja.json" },
+                "ko": { code: "ko", name: "한국어", flag: "🇰🇷", file: "ko.json" },
+                "pt": { code: "pt", name: "Português", flag: "🇵🇹", file: "pt.json" },
+                "pt-br": { code: "pt-br", name: "Português (Brasil)", flag: "🇧🇷", file: "pt_br.json" },
+                "pl": { code: "pl", name: "Polski", flag: "🇵🇱", file: "pl.json" },
+                "nl": { code: "nl", name: "Nederlands", flag: "🇳🇱", file: "nl.json" },
+                "uk": { code: "uk", name: "Українська", flag: "🇺🇦", file: "uk.json" },
+                "cs": { code: "cs", name: "Čeština", flag: "🇨🇿", file: "cs.json" },
+                "da": { code: "da", name: "Dansk", flag: "🇩🇰", file: "da.json" },
+                "sv": { code: "sv", name: "Svenska", flag: "🇸🇪", file: "sv.json" },
+                "nb": { code: "nb", name: "Norsk", flag: "🇳🇴", file: "nb.json" },
+                "tr": { code: "tr", name: "Türkçe", flag: "🇹🇷", file: "tr.json" },
+                "ar": { code: "ar", name: "العربية", flag: "🇸🇦", file: "ar.json" },
+                "hu": { code: "hu", name: "Magyar", flag: "🇭🇺", file: "hu.json" },
+                "et": { code: "et", name: "Eesti", flag: "🇪🇪", file: "et.json" },
+                "sl": { code: "sl", name: "Slovenščina", flag: "🇸🇮", file: "sl.json" },
+                "th": { code: "th", name: "ไทย", flag: "🇹🇭", file: "th.json" },
+                "hi": { code: "hi", name: "हिन्दी", flag: "🇮🇳", file: "hi.json" }
             };
         }
 
@@ -528,10 +552,13 @@
             if (!rawCode || typeof rawCode !== "string") return null;
             const norm = rawCode.toLowerCase().replace("_", "-");
             const prefix = norm.split("-")[0];
-            if (norm === "fr" || norm === "fr-fr" || prefix === "fr") return "fr";
-            if (norm === "en" || norm === "en-us" || norm === "en-gb" || prefix === "en") return "en";
             if (this.supportedLocales[norm]) return norm;
             if (this.supportedLocales[prefix]) return prefix;
+            if (norm.startsWith("zh-tw") || norm.startsWith("zh-hk")) return "zh-tw";
+            if (norm.startsWith("zh")) return "zh";
+            if (norm.startsWith("pt-br")) return "pt-br";
+            if (norm.startsWith("pt")) return "pt";
+            if (norm.startsWith("no") || norm.startsWith("nb")) return "nb";
             return null;
         }
 

@@ -11,6 +11,10 @@ out/
 *.ear
 *.nar
 
+# Local test outputs
+bluemap/
+config/
+
 # IDE & editor configurations
 .idea/
 *.iml
