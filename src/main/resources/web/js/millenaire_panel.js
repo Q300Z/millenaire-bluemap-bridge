@@ -1,7 +1,8 @@
 /**
  * BlueMap Millénaire Interactive Side Panel & Village Directory Extension
+ * Dynamic Multi-Language Engine (MillenaireI18n) & Complete Localization
  * Compatible with BlueMap 5.29 & Millénaire 9.1.0 (MC 26.3 / NeoForge)
- * UI/UX Craftsman: Collapsible Sections, Contextual Tooltips, Tabular Metrics & a11y
+ * UI/UX Craftsman: Reactive i18n, Dark Surface Tokens, Contextual Tooltips & a11y
  */
 (function () {
     "use strict";
@@ -21,249 +22,6 @@
         const trimmed = color.trim();
         if (/^#[0-9a-fA-F]{3,8}$/.test(trimmed)) return trimmed;
         return fallback;
-    }
-
-    // Official descriptions from Millénaire's Travel Book and game files
-    const VILLAGE_TYPE_LORE = {
-        "norman/agricole": {
-            title: "Village Agricole Normand",
-            icon: "🌾",
-            desc: "Un village où de la nourriture abondante est produite sous l'œil vigilant du Sénéchal pour être stockée dans son luxueux manoir.",
-            specialty: "Production vivrière • Élevage • Manoir du Sénéchal"
-        },
-        "norman/artisans": {
-            title: "Village d'Artisans Normand",
-            icon: "⚒️",
-            desc: "Centré sur un majestueux hôtel de ville, ce village est spécialisé dans les bâtiments luxueux et l'authentique artisanat de forge et de maçonnerie.",
-            specialty: "Extraction de pierre • Outils avancés • Grande Mairie"
-        },
-        "norman/ecclesiastique": {
-            title: "Village Ecclésiastique Normand",
-            icon: "⛪",
-            desc: "Étendu autour d'une grande abbaye, ce village existe pour servir les besoins matériels du moine et de la communauté en échange du Salut.",
-            specialty: "Abbaye • Livres & Parchemins • Prieuré"
-        },
-        "norman/militaire": {
-            title: "Village Militaire Normand",
-            icon: "🛡️",
-            desc: "Un village fortifié entourant un donjon militaire massif, approvisionnant la garnison en armes blanches, armures et rations de combat.",
-            specialty: "Garnison d'élite • Fortifications • Armurerie"
-        },
-        "norman/grosbourg": {
-            title: "Gros Bourg Normand",
-            icon: "🏰",
-            desc: "Le centre d'un prospère réseau de hameaux. Ce grand village détient les ateliers et bâtiments communautaires les plus avancés de la région.",
-            specialty: "Capitale régionale • Réseau de hameaux • Marché central"
-        },
-        "norman/notredame": {
-            title: "Cité de la Merveille (Normande)",
-            icon: "🏛️",
-            desc: "Centré sur le chantier de la prestigieuse Cathédrale Normande, ce village supporte la construction de la Merveille et accueille les pèlerins.",
-            specialty: "Merveille du Monde • Dons sacrés • Accueil de pèlerins"
-        },
-        "norman/lonelumberman": {
-            title: "Bûcheron Solitaire",
-            icon: "🪓",
-            desc: "Établissement forestier isolé. Un artisan bûcheron y exploite les forêts environnantes pour fournir du bois de construction aux voyageurs.",
-            specialty: "Bâtiment isolé • Exploitation sylvicole • Commerce de bois"
-        },
-        "norman/loneinn": {
-            title: "Auberge Étape",
-            icon: "🍺",
-            desc: "Relais d'étape implanté au croisement des routes sauvages. Offre le gîte, des boissons fraîches et des provisions aux aventuriers.",
-            specialty: "Bâtiment isolé • Restauration • Commerce voyageur"
-        },
-        "norman/banditlair": {
-            title: "Repaire de Bandits",
-            icon: "☠️",
-            desc: "Campement de hors-la-loi hostiles. Ces maraudeurs attaquent les voyageurs et ne dépendent d'aucune autorité villageoise.",
-            specialty: "Camp hostile • Butins pillés • Danger armé"
-        },
-        "norman/abandonedmine": {
-            title: "Mine Abandonnée",
-            icon: "⛏️",
-            desc: "Ancienne exploitation souterraine désaffectée. Bien que déserte, elle abrite encore de riches filons de pierre et de minerais.",
-            specialty: "Site archéologique • Filons de roche • Vestige"
-        },
-        "byzantines/religiousvillage": {
-            title: "Village Religieux Byzantin (Monastiriako Chorio)",
-            icon: "👑",
-            desc: "Dirigé par un Métropolitain, ce village impérial est réputé pour ses églises d'inspiration romaine, ses fresques, sa soie et son huile d'olive.",
-            specialty: "Églises byzantines • Icônes & Soie • Huile d'olive"
-        },
-        "byzantines/militaryvillage": {
-            title: "Village Militaire Byzantin",
-            icon: "⚔️",
-            desc: "Dirigé par un Centurion dans une forteresse massive, ce village produit de fines armures impériales, des armes d'acier et du vin d'exception.",
-            specialty: "Légion impériale • Forteresse • Armes & Vins"
-        },
-        "byzantines/tradingvillage": {
-            title: "Village Marchand Byzantin",
-            icon: "🪙",
-            desc: "Dirigé par un Baron autour d'un grand marché, réputé pour ses étoffes de soie brodée, ses tapis et son vin Malvasia raffiné.",
-            specialty: "Carrefour commercial • Soieries • Vin Malvasia"
-        },
-        "japanese/bandit_cave": {
-            title: "Caverne de Bandits (Iwamuro no Hito)",
-            icon: "🗡️",
-            desc: "Grotte fortifiée servant de refuge à un groupe de rōnin et de brigands japonais coupés de la société impériale.",
-            specialty: "Hors-la-loi • Guerriers sans maître • Campement secret"
-        },
-        "japanese/kufun_tomb": {
-            title: "Tombeau Mégalithique Kofun",
-            icon: "⛩️",
-            desc: "Ancien tertre funéraire sacré érigé en l'honneur d'un souverain ou d'un seigneur de guerre de l'époque féodale japonaise.",
-            specialty: "Monument historique • Sépulture rituelle • Reliques"
-        },
-        "inuits/banditshack": {
-            title: "Cabane de Pillards Inuits (Unatannik)",
-            icon: "❄️",
-            desc: "Abri de chasseurs renégats opérant dans la toundra glacée, tendant des embuscades aux expéditions solitaires.",
-            specialty: "Pillards polaires • Peaux & Os • Campement nomade"
-        },
-        "inuits/huntingvillage": {
-            title: "Village de Chasse Inuit",
-            icon: "🦭",
-            desc: "Communauté polaire axée sur la chasse aux phoques, la pêche sur glace et le travail des fourrures et du cuir marin.",
-            specialty: "Chasse polaire • Fourrures épaisses • Harpons"
-        },
-        "mayan/agriculture": {
-            title: "Village Agricole Maya",
-            icon: "☀️",
-            desc: "Établi autour d'un terrain de jeu de balle rituel, axé sur la culture sacrée du maïs et du cacao pour honorer le Roi.",
-            specialty: "Fèves de cacao • Maïs sacré • Terrain rituel"
-        },
-        "mayan/military": {
-            title: "Cité Militaire Maya",
-            icon: "🏹",
-            desc: "Protégé par une haute pyramide en gradins, ce village forme des guerriers d'élite et taille des armes tranchantes en obsidienne pure.",
-            specialty: "Pyramide de guerre • Lames d'obsidienne • Sacrifices"
-        },
-        "indian/agricole": {
-            title: "Village Agricole Indien",
-            icon: "🪷",
-            desc: "Village prospère centré sur la riziculture inondée, la cueillette d'épices rares et la préparation de curry parfumé.",
-            specialty: "Rizières en terrasses • Épices sacrées • Briqueterie"
-        },
-        "indian/fort": {
-            title: "Forteresse Rajput Indienne",
-            icon: "🕌",
-            desc: "Bâti au pied d'un grand fort en grès ciselé, ce village assure la défense des marches du royaume et la formation de lanciers.",
-            specialty: "Grand Fort Rajput • Grès ouvragé • Gardes d'élite"
-        }
-    };
-
-    // Functional descriptions for established buildings
-    const BUILDING_DESCRIPTIONS = [
-        { test: (id, name) => id.includes("townhall") || name.includes("mairie") || name.includes("hôtel de ville") || name.includes("centre"),
-          title: "Bâtiment Central / Mairie", icon: "🏛️", desc: "Cœur politique et logistique du village. Centralise les coffres de deniers, planifie l'urbanisme et accueille les marchands.", role: "Administration & Trésorerie" },
-        { test: (id, name) => id.includes("church") || id.includes("eglise") || id.includes("chapel") || id.includes("abbey") || name.includes("église") || name.includes("abbaye"),
-          title: "Lieu de Culte / Église", icon: "⛪", desc: "Sanctuaire spirituel où le prêtre ou le moine célèbre les offices, garantit la bénédiction du village et conserve les reliques.", role: "Culte & Sérénité" },
-        { test: (id, name) => id.includes("fort") || id.includes("castle") || id.includes("donjon") || name.includes("fort") || name.includes("château"),
-          title: "Fortification / Donjon", icon: "🛡️", desc: "Ouvrage militaire majeur abritant le chef d'armes, la garnison et les réserves de guerre en cas d'attaque ennemie.", role: "Défense & Commandement" },
-        { test: (id, name) => id.includes("borderpost") || id.includes("wall") || id.includes("gate") || name.includes("frontière") || name.includes("muraille") || name.includes("porte"),
-          title: "Poste Frontière & Remparts", icon: "🧱", desc: "Délimite l'emprise territoriale du village. Fournit des postes de guet surélevés pour repérer les intrus et les monstres.", role: "Sécurité & Délimitation" },
-        { test: (id, name) => id.includes("farm") || id.includes("champ") || name.includes("ferme") || name.includes("verger") || name.includes("grange"),
-          title: "Ferme & Exploitation Vivrière", icon: "🌾", desc: "Produit les céréales, légumes et denrées de subsistance pour nourrir les villageois et stimuler la natalité.", role: "Production Vivrière" },
-        { test: (id, name) => id.includes("bakery") || id.includes("boulang") || id.includes("mill") || name.includes("four") || name.includes("moulin"),
-          title: "Fournil / Moulin Artisanal", icon: "🍞", desc: "Transforme les céréales brutes en farine puis en pains savoureux pour alimenter la réserve centrale de nourriture.", role: "Transformation des Vivres" },
-        { test: (id, name) => id.includes("forge") || id.includes("smith") || name.includes("forge") || name.includes("armurerie"),
-          title: "Forge & Métallurgie", icon: "⚒️", desc: "Atelier où le forgeron façonne des outils agraires robustes et des armes en fer pour équiper les sentinelles.", role: "Outillage & Équipement" },
-        { test: (id, name) => id.includes("lumber") || id.includes("wood") || name.includes("bûcheron") || name.includes("scie"),
-          title: "Poste de Bûcheron", icon: "🪓", desc: "Cabane de forestier abattant et taillant les arbres environnants pour fournir le bois indispensable aux chantiers.", role: "Ressources Sylvicoles" },
-        { test: (id, name) => id.includes("quarry") || id.includes("mine") || name.includes("carrière") || name.includes("mine"),
-          title: "Carrière d'Extraction", icon: "⛏️", desc: "Gisement de pierre, sable ou argile extrait activement pour approvisionner les maçons et briquetiers du village.", role: "Matériaux de Construction" },
-        { test: (id, name) => id.includes("inn") || id.includes("tavern") || name.includes("auberge") || name.includes("taverne"),
-          title: "Auberge / Taverne", icon: "🍺", desc: "Lieu de convivialité villageois servant du cidre ou du vin, favorisant les échanges et la venue de voyageurs marchands.", role: "Commerce & Convivialité" },
-        { test: (id, name) => id.includes("house") || id.includes("maison") || id.includes("hab") || name.includes("maison"),
-          title: "Maison d'Habitation", icon: "🏠", desc: "Demeure résidentielle hébergeant une famille de villageois et leurs enfants, contribuant à la croissance démographique.", role: "Logement & Population" }
-    ];
-
-    function resolveVillageLore(culture, villageType, isLone, typeName) {
-        // Strip culture prefix if duplicate
-        const cult = (culture || "").replace("millenaire:", "");
-        const rawType = (villageType || "").replace("millenaire:", "");
-        const cleanType = rawType.includes("/") ? rawType.split("/")[1] : rawType;
-        const lookupKey = `${cult}/${cleanType}`;
-
-        if (VILLAGE_TYPE_LORE[lookupKey]) return VILLAGE_TYPE_LORE[lookupKey];
-        if (VILLAGE_TYPE_LORE[cleanType]) return VILLAGE_TYPE_LORE[cleanType];
-
-        // Search partial matches
-        for (const [k, v] of Object.entries(VILLAGE_TYPE_LORE)) {
-            if (cleanType.includes(k.split("/")[1]) || (cult && k.startsWith(cult))) {
-                if (cleanType.toLowerCase().includes(k.toLowerCase())) return v;
-            }
-        }
-
-        // Generic Fallback
-        if (isLone) {
-            return {
-                title: typeName || "Bâtiment Isolé",
-                icon: "🏕️",
-                desc: "Un avant-poste indépendant ou une demeure autonome vivant en autarcie dans la nature sans gouvernance de village.",
-                specialty: "Autarcie • Commerce autonome • Présence locale"
-            };
-        }
-        return {
-            title: typeName || "Communauté Villageoise",
-            icon: "🏘️",
-            desc: "Un village Millénaire autonome doté de son propre modèle économique, de ses artisans et de ses lois coutumières.",
-            specialty: "Économie locale • Urbanisme dynamique • Diplomatie"
-        };
-    }
-
-    function resolveBuildingLore(planId, name) {
-        const p = (planId || "").toLowerCase();
-        const n = (name || "").toLowerCase();
-        for (const b of BUILDING_DESCRIPTIONS) {
-            if (b.test(p, n)) return b;
-        }
-        return {
-            title: name || "Bâtiment Communautaire",
-            icon: "🏛️",
-            desc: "Structure villageoise établie contribuant à l'essor, à l'organisation ou au patrimoine de la communauté locale.",
-            role: "Infrastructure du village"
-        };
-    }
-
-    // Fallback dictionary for common vanilla item keys in projects
-    const VANILLA_TRANSLATIONS = {
-        "minecraft:cauldron": "Chaudron",
-        "minecraft:furnace": "Fourneau",
-        "minecraft:crafting_table": "Établi",
-        "minecraft:chest": "Coffre",
-        "minecraft:ladder": "Échelle",
-        "minecraft:glass": "Verre",
-        "minecraft:torch": "Torche",
-        "minecraft:iron_bars": "Barreaux de fer",
-        "minecraft:smooth_stone": "Roche lisse",
-        "minecraft:cobblestone": "Pierre",
-        "minecraft:stone": "Roche",
-        "minecraft:oak_log": "Bûche de chêne",
-        "minecraft:birch_log": "Bûche de bouleau",
-        "minecraft:spruce_log": "Bûche de sapin",
-        "minecraft:dark_oak_log": "Bûche de chêne noir",
-        "minecraft:acacia_log": "Bûche d'acacia",
-        "minecraft:jungle_log": "Bûche d'acajou",
-        "minecraft:mangrove_log": "Bûche de palétuvier",
-        "minecraft:cherry_log": "Bûche de cerisier",
-        "millenaire:anywood_log": "Bûches (tout type)",
-        "millenaire:thatch": "Chaume",
-        "millenaire:mudbrick": "Brique de boue",
-        "millenaire:cookedbrick": "Brique cuite",
-        "millenaire:byzantine_stone_tile": "Tuile de pierre byzantine",
-        "millenaire:paper_wall": "Mur en papier"
-    };
-
-    function translateItem(itemId, fallbackName) {
-        if (!itemId) return fallbackName || "Matériau inconnu";
-        if (VANILLA_TRANSLATIONS[itemId]) return VANILLA_TRANSLATIONS[itemId];
-        if (fallbackName && fallbackName !== itemId && !fallbackName.startsWith("minecraft:")) {
-            return fallbackName;
-        }
-        const raw = itemId.replace(/^[a-z0-9_-]+:/, "").replace(/_/g, " ");
-        return raw.charAt(0).toUpperCase() + raw.slice(1);
     }
 
     function getCultureIcon(cultureId) {
@@ -302,8 +60,771 @@
         return "⚔️";
     }
 
-    class MillenairePanelController {
+    function getVillageTypeIcon(typeId, cultureId, isLone) {
+        const t = (typeId || "").toLowerCase();
+        const c = (cultureId || "").toLowerCase();
+        if (t.includes("agricole") || t.includes("farm") || t.includes("harvest")) return "🌾";
+        if (t.includes("artisan") || t.includes("craft") || t.includes("forge")) return "⚒️";
+        if (t.includes("ecclesiastique") || t.includes("church") || t.includes("abbey") || t.includes("religious") || t.includes("monast")) return c.includes("byzant") ? "👑" : "⛪";
+        if (t.includes("militaire") || t.includes("military") || t.includes("donjon")) return c.includes("mayan") ? "🏹" : "🛡️";
+        if (t.includes("fort") || t.includes("rajput")) return c.includes("seljuk") || c.includes("indian") ? "🕌" : "⚔️";
+        if (t.includes("grosbourg") || t.includes("town") || t.includes("centre")) return "🏰";
+        if (t.includes("trading") || t.includes("marchand") || t.includes("market")) return "🪙";
+        if (t.includes("notredame") || t.includes("merveille") || t.includes("wonder")) return "🏛️";
+        if (t.includes("lumber") || t.includes("forest") || t.includes("bois")) return "🪓";
+        if (t.includes("inn") || t.includes("auberge") || t.includes("tavern")) return "🍺";
+        if (t.includes("bandit") || t.includes("shack") || t.includes("cave") || t.includes("repaire") || t.includes("pillard")) return "☠️";
+        if (t.includes("mine") || t.includes("quarry")) return "⛏️";
+        if (t.includes("kofun") || t.includes("kufun") || t.includes("tomb")) return "⛩️";
+        if (t.includes("hunt") || t.includes("chasse")) return "🦭";
+        if (isLone) return "🏕️";
+        return "🏘️";
+    }
+
+    // Bidirectional stockpile name mappings for common items exported with translated labels
+    const STOCKPILE_FR_TO_EN = {
+        "Roche": "Stone",
+        "Pierre": "Cobblestone",
+        "Bûches (tout type)": "Logs (any type)",
+        "Brique de terre": "Mud Brick",
+        "Brique de boue": "Mud Brick",
+        "Brique cuite": "Cooked Brick",
+        "Chaume": "Thatch",
+        "Verre": "Glass",
+        "Fourneau": "Furnace",
+        "Établi": "Crafting Table",
+        "Coffre": "Chest",
+        "Échelle": "Ladder",
+        "Torche": "Torch",
+        "Barreaux de fer": "Iron Bars",
+        "Roche lisse": "Smooth Stone",
+        "Pain": "Bread",
+        "Cidre": "Cider",
+        "Pomme": "Apple",
+        "Blé": "Wheat",
+        "Carotte": "Carrot",
+        "Patate": "Potato",
+        "Poisson": "Fish",
+        "Viande cuite": "Cooked Meat",
+        "Riz": "Rice",
+        "Curry": "Curry",
+        "Raisin": "Grapes",
+        "Vin": "Wine",
+        "Tripes": "Tripe",
+        "Bière": "Beer",
+        "Hydromel": "Mead",
+        "Liqueur de cacao": "Cacao Liquor"
+    };
+
+    const STOCKPILE_EN_TO_FR = Object.fromEntries(
+        Object.entries(STOCKPILE_FR_TO_EN).map(([fr, en]) => [en, fr])
+    );
+
+    // Functional categories for buildings with localized keys
+    const BUILDING_CATEGORIES = [
+        {
+            test: (id, name) => id.includes("townhall") || name.includes("mairie") || name.includes("hôtel de ville") || name.includes("centre") || id.includes("centre"),
+            icon: "🏛️",
+            titleKey: "panel.millenaire.bld.townhall.title",
+            descKey: "panel.millenaire.bld.townhall.desc",
+            roleKey: "panel.millenaire.bld.townhall.role",
+            fallbackTitle: "Bâtiment Central / Mairie",
+            fallbackDesc: "Cœur politique et logistique du village. Centralise les coffres de deniers, planifie l'urbanisme et accueille les marchands.",
+            fallbackRole: "Administration & Trésorerie"
+        },
+        {
+            test: (id, name) => id.includes("church") || id.includes("eglise") || id.includes("chapel") || id.includes("abbey") || name.includes("église") || name.includes("abbaye"),
+            icon: "⛪",
+            titleKey: "panel.millenaire.bld.church.title",
+            descKey: "panel.millenaire.bld.church.desc",
+            roleKey: "panel.millenaire.bld.church.role",
+            fallbackTitle: "Lieu de Culte / Église",
+            fallbackDesc: "Sanctuaire spirituel où le prêtre ou le moine célèbre les offices, garantit la bénédiction du village et conserve les reliques.",
+            fallbackRole: "Culte & Sérénité"
+        },
+        {
+            test: (id, name) => id.includes("fort") || id.includes("castle") || id.includes("donjon") || name.includes("fort") || name.includes("château"),
+            icon: "🛡️",
+            titleKey: "panel.millenaire.bld.fort.title",
+            descKey: "panel.millenaire.bld.fort.desc",
+            roleKey: "panel.millenaire.bld.fort.role",
+            fallbackTitle: "Fortification / Donjon",
+            fallbackDesc: "Ouvrage militaire majeur abritant le chef d'armes, la garnison et les réserves de guerre en cas d'attaque ennemie.",
+            fallbackRole: "Défense & Commandement"
+        },
+        {
+            test: (id, name) => id.includes("borderpost") || id.includes("wall") || id.includes("gate") || name.includes("frontière") || name.includes("muraille") || name.includes("porte"),
+            icon: "🧱",
+            titleKey: "panel.millenaire.bld.wall.title",
+            descKey: "panel.millenaire.bld.wall.desc",
+            roleKey: "panel.millenaire.bld.wall.role",
+            fallbackTitle: "Poste Frontière & Remparts",
+            fallbackDesc: "Délimite l'emprise territoriale du village. Fournit des postes de guet surélevés pour repérer les intrus et les monstres.",
+            fallbackRole: "Sécurité & Délimitation"
+        },
+        {
+            test: (id, name) => id.includes("farm") || id.includes("champ") || name.includes("ferme") || name.includes("verger") || name.includes("grange"),
+            icon: "🌾",
+            titleKey: "panel.millenaire.bld.farm.title",
+            descKey: "panel.millenaire.bld.farm.desc",
+            roleKey: "panel.millenaire.bld.farm.role",
+            fallbackTitle: "Ferme & Exploitation Vivrière",
+            fallbackDesc: "Produit les céréales, légumes et denrées de subsistance pour nourrir les villageois et stimuler la natalité.",
+            fallbackRole: "Production Vivrière"
+        },
+        {
+            test: (id, name) => id.includes("bakery") || id.includes("boulang") || id.includes("mill") || name.includes("four") || name.includes("moulin"),
+            icon: "🍞",
+            titleKey: "panel.millenaire.bld.bakery.title",
+            descKey: "panel.millenaire.bld.bakery.desc",
+            roleKey: "panel.millenaire.bld.bakery.role",
+            fallbackTitle: "Fournil / Moulin Artisanal",
+            fallbackDesc: "Transforme les céréales brutes en farine puis en pains savoureux pour alimenter la réserve centrale de nourriture.",
+            fallbackRole: "Transformation des Vivres"
+        },
+        {
+            test: (id, name) => id.includes("forge") || id.includes("smith") || name.includes("forge") || name.includes("armurerie"),
+            icon: "⚒️",
+            titleKey: "panel.millenaire.bld.forge.title",
+            descKey: "panel.millenaire.bld.forge.desc",
+            roleKey: "panel.millenaire.bld.forge.role",
+            fallbackTitle: "Forge & Métallurgie",
+            fallbackDesc: "Atelier où le forgeron façonne des outils agraires robustes et des armes en fer pour équiper les sentinelles.",
+            fallbackRole: "Outillage & Équipement"
+        },
+        {
+            test: (id, name) => id.includes("lumber") || id.includes("wood") || name.includes("bûcheron") || name.includes("scie"),
+            icon: "🪓",
+            titleKey: "panel.millenaire.bld.lumber.title",
+            descKey: "panel.millenaire.bld.lumber.desc",
+            roleKey: "panel.millenaire.bld.lumber.role",
+            fallbackTitle: "Poste de Bûcheron",
+            fallbackDesc: "Cabane de forestier abattant et taillant les arbres environnants pour fournir le bois indispensable aux chantiers.",
+            fallbackRole: "Ressources Sylvicoles"
+        },
+        {
+            test: (id, name) => id.includes("quarry") || id.includes("mine") || name.includes("carrière") || name.includes("mine"),
+            icon: "⛏️",
+            titleKey: "panel.millenaire.bld.quarry.title",
+            descKey: "panel.millenaire.bld.quarry.desc",
+            roleKey: "panel.millenaire.bld.quarry.role",
+            fallbackTitle: "Carrière d'Extraction",
+            fallbackDesc: "Gisement de pierre, sable ou argile extrait activement pour approvisionner les maçons et briquetiers du village.",
+            fallbackRole: "Matériaux de Construction"
+        },
+        {
+            test: (id, name) => id.includes("inn") || id.includes("tavern") || name.includes("auberge") || name.includes("taverne"),
+            icon: "🍺",
+            titleKey: "panel.millenaire.bld.inn.title",
+            descKey: "panel.millenaire.bld.inn.desc",
+            roleKey: "panel.millenaire.bld.inn.role",
+            fallbackTitle: "Auberge / Taverne",
+            fallbackDesc: "Lieu de convivialité villageois servant du cidre ou du vin, favorisant les échanges et la venue de voyageurs marchands.",
+            fallbackRole: "Commerce & Convivialité"
+        },
+        {
+            test: (id, name) => id.includes("house") || id.includes("maison") || id.includes("hab") || name.includes("maison"),
+            icon: "🏠",
+            titleKey: "panel.millenaire.bld.house.title",
+            descKey: "panel.millenaire.bld.house.desc",
+            roleKey: "panel.millenaire.bld.house.role",
+            fallbackTitle: "Maison d'Habitation",
+            fallbackDesc: "Demeure résidentielle hébergeant une famille de villageois et leurs enfants, contribuant à la croissance démographique.",
+            fallbackRole: "Logement & Population"
+        }
+    ];
+
+    // Embedded in-memory UI fallbacks for instant display before network fetch completes
+    const EMBEDDED_UI_FALLBACKS = {
+        fr: {
+            "panel.millenaire.directory.toggle_button": "Afficher l'annuaire des villages Millénaire",
+            "panel.millenaire.directory.title": "Annuaire des Villages Millénaire",
+            "panel.millenaire.directory.villages_tab": "Villages",
+            "panel.millenaire.directory.search_placeholder": "Rechercher un village ou une culture...",
+            "panel.millenaire.directory.search_label": "Recherche",
+            "panel.millenaire.directory.filter_all": "Tous",
+            "panel.millenaire.directory.filter_villages": "Villages",
+            "panel.millenaire.directory.filter_lone": "Isolés",
+            "panel.millenaire.directory.empty": "Aucun village correspondant trouvé.",
+            "panel.millenaire.directory.goto_title": "Centrer et inspecter",
+            "panel.millenaire.panel_details_aria": "Détails du village Millénaire",
+            "panel.millenaire.button.close": "Fermer",
+            "panel.millenaire.button.close_directory": "Fermer l'annuaire",
+            "panel.millenaire.button.close_panel": "Fermer le panneau",
+            "panel.millenaire.button.back_to_directory": "Retour à l'annuaire",
+            "panel.millenaire.button.back_to_list": "Retour à la liste des villages",
+            "panel.millenaire.type_pill_title": "Cliquer ou survoler pour la description",
+            "panel.millenaire.coords_title": "Coordonnées du centre",
+            "panel.millenaire.focus_btn_text": "Centrer",
+            "panel.millenaire.focus_btn_title": "Centrer la vue 3D",
+            "panel.millenaire.badge.under_attack": "🔥 Sous attaque !",
+            "panel.millenaire.badge.active_raid_target": "Raid en cours contre {target}",
+            "panel.millenaire.badge.raiding_to": "⚔️ En raid → {target}",
+            "panel.millenaire.badge.peaceful": "🕊️ Paisible",
+            "panel.millenaire.stat.defense_title": "Force défensive",
+            "panel.millenaire.stat.defense_short": "Déf: ",
+            "panel.millenaire.stat.raid_strength_title": "Force de raid",
+            "panel.millenaire.stat.raid_short": "Raid: ",
+            "panel.millenaire.stat.buildings_count": "Nombre de bâtiments",
+            "panel.millenaire.stat.buildings_short_label": "Bât: ",
+            "panel.millenaire.stat.inhabitants_short": "hab.",
+            "panel.millenaire.stat.buildings_short": "bât.",
+            "panel.millenaire.stat.relations_short": "rel.",
+            "panel.millenaire.tab.population": "👥 Population",
+            "panel.millenaire.tab.economy": "📦 Économie & Travaux",
+            "panel.millenaire.tab.diplomacy": "🤝 Diplomatie",
+            "panel.millenaire.sync_realtime": "Synchronisation en temps réel",
+            "panel.millenaire.updated_at": "Mis à jour à {time} • Monde : {world}",
+            "panel.millenaire.stat.population": "Population Totale",
+            "panel.millenaire.stat.men": "Hommes",
+            "panel.millenaire.stat.women": "Femmes",
+            "panel.millenaire.stat.children": "Enfants",
+            "panel.millenaire.section.roster": "Registre des Habitants",
+            "panel.millenaire.roster.no_villagers": "Aucun habitant recensé.",
+            "panel.millenaire.military_strength_title": "Force militaire: {strength}",
+            "panel.millenaire.badge.raiding": "⚔️ Raid",
+            "panel.millenaire.badge.hired": "🤝 Embauché",
+            "panel.millenaire.badge.killed": "💀 Décédé",
+            "panel.millenaire.economy.deniers": "Trésorerie & Réserves Majeures",
+            "panel.millenaire.economy.deniers_gold_short": "Or",
+            "panel.millenaire.economy.deniers_silver_short": "Argent",
+            "panel.millenaire.economy.deniers_copper_short": "Bronze",
+            "panel.millenaire.economy.wood_short": "Bois",
+            "panel.millenaire.economy.stone_short": "Pierre",
+            "panel.millenaire.economy.food_short": "Nourriture",
+            "panel.millenaire.section.projects": "Chantiers de Construction",
+            "panel.millenaire.project.no_projects": "Aucun chantier en cours actuellement.",
+            "panel.millenaire.project.default_name": "Chantier",
+            "panel.millenaire.project.blocked": "⚠️ Chantier suspendu : matériaux manquants en coffres",
+            "panel.millenaire.project.req_title": "Matériaux requis pour l'étape :",
+            "panel.millenaire.project.missing_count": "⚠️ {count} manquant(s)",
+            "panel.millenaire.project.ready_tag": "✓ Approvisionné",
+            "panel.millenaire.project.resource_sufficient": "Ressource suffisante en stock",
+            "panel.millenaire.project.resource_deficit": "Déficit de {diff} unités",
+            "panel.millenaire.section.stockpiles": "Détail des Stocks en Coffres",
+            "panel.millenaire.stockpile.empty": "Aucune marchandise recensée dans les coffres.",
+            "panel.millenaire.section.buildings": "Bâtiments Établis",
+            "panel.millenaire.buildings.no_buildings": "Aucun bâtiment établi.",
+            "panel.millenaire.buildings.fortifications": "Fortifications",
+            "panel.millenaire.buildings.click_to_focus": "Cliquer pour centrer la caméra 3D",
+            "panel.millenaire.buildings.click_to_focus_zone": "Cliquer pour centrer la zone",
+            "panel.millenaire.section.diplomacy": "Relations Inter-Villages",
+            "panel.millenaire.diplomacy.raid_banner_prefix": "Expédition militaire en cours :",
+            "panel.millenaire.diplomacy.raid_banner_body": "Ce village mène un raid offensif vers {target} !",
+            "panel.millenaire.diplomacy.no_relations": "Aucune relation diplomatique externe enregistrée pour cet établissement.",
+            "panel.millenaire.diplomacy.distance": "• Distance : {dist} m",
+            "panel.millenaire.diplomacy.view_btn": "Voir",
+            "panel.millenaire.diplomacy.view_btn_title": "Centrer la carte 3D sur ce village",
+            "panel.millenaire.diplomacy.view_btn_aria": "Centrer sur {target}",
+            "panel.millenaire.badge.lone_building": "Bâtiment Isolé",
+            "panel.millenaire.section.community": "Communauté Villageoise",
+            "panel.millenaire.lore.lone_building_desc": "Un avant-poste indépendant ou une demeure autonome vivant en autarcie dans la nature sans gouvernance de village.",
+            "panel.millenaire.lore.community_desc": "Un village Millénaire autonome doté de son propre modèle économique, de ses artisans et de ses lois coutumières.",
+            "panel.millenaire.lore.lone_specialty": "Autarcie • Commerce autonome • Présence locale",
+            "panel.millenaire.lore.community_specialty": "Économie locale • Urbanisme dynamique • Diplomatie",
+            "panel.millenaire.tooltip.title": "Titre",
+            "panel.millenaire.tooltip.desc": "Description",
+            "panel.millenaire.tooltip.tag": "Spécialité",
+            "panel.millenaire.unknown_item": "Matériau inconnu",
+            "panel.millenaire.lang_selector_aria": "Choisir la langue / Select language",
+            "panel.millenaire.bld.townhall.title": "Bâtiment Central / Mairie",
+            "panel.millenaire.bld.townhall.desc": "Cœur politique et logistique du village. Centralise les coffres de deniers, planifie l'urbanisme et accueille les marchands.",
+            "panel.millenaire.bld.townhall.role": "Administration & Trésorerie",
+            "panel.millenaire.bld.church.title": "Lieu de Culte / Église",
+            "panel.millenaire.bld.church.desc": "Sanctuaire spirituel où le prêtre ou le moine célèbre les offices, garantit la bénédiction du village et conserve les reliques.",
+            "panel.millenaire.bld.church.role": "Culte & Sérénité",
+            "panel.millenaire.bld.fort.title": "Fortification / Donjon",
+            "panel.millenaire.bld.fort.desc": "Ouvrage militaire majeur abritant le chef d'armes, la garnison et les réserves de guerre en cas d'attaque ennemie.",
+            "panel.millenaire.bld.fort.role": "Défense & Commandement",
+            "panel.millenaire.bld.wall.title": "Poste Frontière & Remparts",
+            "panel.millenaire.bld.wall.desc": "Délimite l'emprise territoriale du village. Fournit des postes de guet surélevés pour repérer les intrus et les monstres.",
+            "panel.millenaire.bld.wall.role": "Sécurité & Délimitation",
+            "panel.millenaire.bld.farm.title": "Ferme & Exploitation Vivrière",
+            "panel.millenaire.bld.farm.desc": "Produit les céréales, légumes et denrées de subsistance pour nourrir les villageois et stimuler la natalité.",
+            "panel.millenaire.bld.farm.role": "Production Vivrière",
+            "panel.millenaire.bld.bakery.title": "Fournil / Moulin Artisanal",
+            "panel.millenaire.bld.bakery.desc": "Transforme les céréales brutes en farine puis en pains savoureux pour alimenter la réserve centrale de nourriture.",
+            "panel.millenaire.bld.bakery.role": "Transformation des Vivres",
+            "panel.millenaire.bld.forge.title": "Forge & Métallurgie",
+            "panel.millenaire.bld.forge.desc": "Atelier où le forgeron façonne des outils agraires robustes et des armes en fer pour équiper les sentinelles.",
+            "panel.millenaire.bld.forge.role": "Outillage & Équipement",
+            "panel.millenaire.bld.lumber.title": "Poste de Bûcheron",
+            "panel.millenaire.bld.lumber.desc": "Cabane de forestier abattant et taillant les arbres environnants pour fournir le bois indispensable aux chantiers.",
+            "panel.millenaire.bld.lumber.role": "Ressources Sylvicoles",
+            "panel.millenaire.bld.quarry.title": "Carrière d'Extraction",
+            "panel.millenaire.bld.quarry.desc": "Gisement de pierre, sable ou argile extrait activement pour approvisionner les maçons et briquetiers du village.",
+            "panel.millenaire.bld.quarry.role": "Matériaux de Construction",
+            "panel.millenaire.bld.inn.title": "Auberge / Taverne",
+            "panel.millenaire.bld.inn.desc": "Lieu de convivialité villageois servant du cidre ou du vin, favorisant les échanges et la venue de voyageurs marchands.",
+            "panel.millenaire.bld.inn.role": "Commerce & Convivialité",
+            "panel.millenaire.bld.house.title": "Maison d'Habitation",
+            "panel.millenaire.bld.house.desc": "Demeure résidentielle hébergeant une famille de villageois et leurs enfants, contribuant à la croissance démographique.",
+            "panel.millenaire.bld.house.role": "Logement & Population",
+            "panel.millenaire.bld.generic.title": "Bâtiment Communautaire",
+            "panel.millenaire.bld.generic.desc": "Structure villageoise établie contribuant à l'essor, à l'organisation ou au patrimoine de la communauté locale.",
+            "panel.millenaire.bld.generic.role": "Infrastructure du village",
+            "millenaire.bridge.ui.building": "Bâtiment",
+            "millenaire.bridge.ui.coords": "X: {x}, Y: {y}, Z: {z}",
+            "millenaire.bridge.ui.level": "Niv. {level}",
+            "millenaire.bridge.ui.unknown_culture": "Culture Inconnue",
+            "millenaire.bridge.ui.unknown_village": "Village Inconnu",
+            "millenaire.bridge.ui.unknown_name": "Inconnu",
+            "millenaire.bridge.ui.villager": "Villageois",
+            "relation.millenaire.neutral": "Neutre"
+        },
+        en: {
+            "panel.millenaire.directory.toggle_button": "Show Millénaire Village Directory",
+            "panel.millenaire.directory.title": "Millénaire Village Directory",
+            "panel.millenaire.directory.villages_tab": "Villages",
+            "panel.millenaire.directory.search_placeholder": "Search village or culture...",
+            "panel.millenaire.directory.search_label": "Search",
+            "panel.millenaire.directory.filter_all": "All",
+            "panel.millenaire.directory.filter_villages": "Villages",
+            "panel.millenaire.directory.filter_lone": "Isolated",
+            "panel.millenaire.directory.empty": "No matching villages found.",
+            "panel.millenaire.directory.goto_title": "Center and inspect",
+            "panel.millenaire.panel_details_aria": "Millénaire village details",
+            "panel.millenaire.button.close": "Close",
+            "panel.millenaire.button.close_directory": "Close directory",
+            "panel.millenaire.button.close_panel": "Close panel",
+            "panel.millenaire.button.back_to_directory": "Back to directory",
+            "panel.millenaire.button.back_to_list": "Back to village list",
+            "panel.millenaire.type_pill_title": "Click or hover for description",
+            "panel.millenaire.coords_title": "Center coordinates",
+            "panel.millenaire.focus_btn_text": "Center",
+            "panel.millenaire.focus_btn_title": "Center 3D camera",
+            "panel.millenaire.badge.under_attack": "🔥 Under attack!",
+            "panel.millenaire.badge.active_raid_target": "Raid in progress against {target}",
+            "panel.millenaire.badge.raiding_to": "⚔️ Raiding → {target}",
+            "panel.millenaire.badge.peaceful": "🕊️ Peaceful",
+            "panel.millenaire.stat.defense_title": "Defensive strength",
+            "panel.millenaire.stat.defense_short": "Def: ",
+            "panel.millenaire.stat.raid_strength_title": "Raid strength",
+            "panel.millenaire.stat.raid_short": "Raid: ",
+            "panel.millenaire.stat.buildings_count": "Number of buildings",
+            "panel.millenaire.stat.buildings_short_label": "Bld: ",
+            "panel.millenaire.stat.inhabitants_short": "hab.",
+            "panel.millenaire.stat.buildings_short": "bld.",
+            "panel.millenaire.stat.relations_short": "rel.",
+            "panel.millenaire.tab.population": "👥 Population",
+            "panel.millenaire.tab.economy": "📦 Economy & Projects",
+            "panel.millenaire.tab.diplomacy": "🤝 Diplomacy",
+            "panel.millenaire.sync_realtime": "Real-time synchronization",
+            "panel.millenaire.updated_at": "Updated at {time} • World: {world}",
+            "panel.millenaire.stat.population": "Total Population",
+            "panel.millenaire.stat.men": "Men",
+            "panel.millenaire.stat.women": "Women",
+            "panel.millenaire.stat.children": "Children",
+            "panel.millenaire.section.roster": "Villager Register",
+            "panel.millenaire.roster.no_villagers": "No villagers recorded.",
+            "panel.millenaire.military_strength_title": "Military strength: {strength}",
+            "panel.millenaire.badge.raiding": "⚔️ Raid",
+            "panel.millenaire.badge.hired": "🤝 Hired",
+            "panel.millenaire.badge.killed": "💀 Fallen",
+            "panel.millenaire.economy.deniers": "Treasury & Major Reserves",
+            "panel.millenaire.economy.deniers_gold_short": "Gold",
+            "panel.millenaire.economy.deniers_silver_short": "Silver",
+            "panel.millenaire.economy.deniers_copper_short": "Bronze",
+            "panel.millenaire.economy.wood_short": "Wood",
+            "panel.millenaire.economy.stone_short": "Stone",
+            "panel.millenaire.economy.food_short": "Food",
+            "panel.millenaire.section.projects": "Construction Projects",
+            "panel.millenaire.project.no_projects": "No active construction projects.",
+            "panel.millenaire.project.default_name": "Project",
+            "panel.millenaire.project.blocked": "⚠️ Construction suspended: missing materials in chests",
+            "panel.millenaire.project.req_title": "Required materials for step:",
+            "panel.millenaire.project.missing_count": "⚠️ {count} missing",
+            "panel.millenaire.project.ready_tag": "✓ Supplied",
+            "panel.millenaire.project.resource_sufficient": "Sufficient resource in stock",
+            "panel.millenaire.project.resource_deficit": "Deficit of {diff} units",
+            "panel.millenaire.section.stockpiles": "Chest Inventory Details",
+            "panel.millenaire.stockpile.empty": "No items recorded in chests.",
+            "panel.millenaire.section.buildings": "Established Buildings",
+            "panel.millenaire.buildings.no_buildings": "No established buildings.",
+            "panel.millenaire.buildings.fortifications": "Fortifications",
+            "panel.millenaire.buildings.click_to_focus": "Click to center 3D camera",
+            "panel.millenaire.buildings.click_to_focus_zone": "Click to center zone",
+            "panel.millenaire.section.diplomacy": "Inter-Village Relations",
+            "panel.millenaire.diplomacy.raid_banner_prefix": "Military expedition in progress:",
+            "panel.millenaire.diplomacy.raid_banner_body": "This village is conducting a raid against {target}!",
+            "panel.millenaire.diplomacy.no_relations": "No external diplomatic relations recorded for this settlement.",
+            "panel.millenaire.diplomacy.distance": "• Distance: {dist} m",
+            "panel.millenaire.diplomacy.view_btn": "View",
+            "panel.millenaire.diplomacy.view_btn_title": "Center 3D map on this village",
+            "panel.millenaire.diplomacy.view_btn_aria": "Center on {target}",
+            "panel.millenaire.badge.lone_building": "Lone Building",
+            "panel.millenaire.section.community": "Village Community",
+            "panel.millenaire.lore.lone_building_desc": "An independent outpost or autonomous homestead living self-sufficiently without village governance.",
+            "panel.millenaire.lore.community_desc": "An autonomous Millénaire village with its own economic model, artisans, and customary laws.",
+            "panel.millenaire.lore.lone_specialty": "Self-reliance • Independent trade • Local presence",
+            "panel.millenaire.lore.community_specialty": "Local economy • Dynamic urbanism • Diplomacy",
+            "panel.millenaire.tooltip.title": "Title",
+            "panel.millenaire.tooltip.desc": "Description",
+            "panel.millenaire.tooltip.tag": "Specialty",
+            "panel.millenaire.unknown_item": "Unknown material",
+            "panel.millenaire.lang_selector_aria": "Select language / Choisir la langue",
+            "panel.millenaire.bld.townhall.title": "Central Building / Town Hall",
+            "panel.millenaire.bld.townhall.desc": "Political and logistical heart of the village. Centralizes currency chests, manages urban planning, and welcomes merchants.",
+            "panel.millenaire.bld.townhall.role": "Administration & Treasury",
+            "panel.millenaire.bld.church.title": "Place of Worship / Church",
+            "panel.millenaire.bld.church.desc": "Spiritual sanctuary where the priest or monk leads services, bestows blessings upon the village, and safeguards holy relics.",
+            "panel.millenaire.bld.church.role": "Worship & Serenity",
+            "panel.millenaire.bld.fort.title": "Fortification / Keep",
+            "panel.millenaire.bld.fort.desc": "Major military stronghold housing the captain of the guard, the garrison, and war supplies in the event of an attack.",
+            "panel.millenaire.bld.fort.role": "Defense & Command",
+            "panel.millenaire.bld.wall.title": "Border Post & Ramparts",
+            "panel.millenaire.bld.wall.desc": "Defines the territorial boundaries of the settlement. Provides elevated watchposts to spot intruders and hostile creatures.",
+            "panel.millenaire.bld.wall.role": "Security & Demarcation",
+            "panel.millenaire.bld.farm.title": "Farm & Food Production",
+            "panel.millenaire.bld.farm.desc": "Produces grain, crops, and essential foodstuffs to sustain villagers and promote population growth.",
+            "panel.millenaire.bld.farm.role": "Food Production",
+            "panel.millenaire.bld.bakery.title": "Bakery / Mill",
+            "panel.millenaire.bld.bakery.desc": "Processes raw grain into flour and freshly baked bread to replenish the central food supply.",
+            "panel.millenaire.bld.bakery.role": "Food Processing",
+            "panel.millenaire.bld.forge.title": "Forge & Metallurgy",
+            "panel.millenaire.bld.forge.desc": "Workshop where the blacksmith crafts sturdy farming implements and iron weaponry for sentinels.",
+            "panel.millenaire.bld.forge.role": "Tools & Armament",
+            "panel.millenaire.bld.lumber.title": "Lumberman Post",
+            "panel.millenaire.bld.lumber.desc": "Woodcutter shelter harvesting timber from surrounding forests, supplying wood essential for building projects.",
+            "panel.millenaire.bld.lumber.role": "Forestry Resources",
+            "panel.millenaire.bld.quarry.title": "Extraction Quarry",
+            "panel.millenaire.bld.quarry.desc": "Active deposit of stone, sand, or clay quarried to supply the village masons and brickmakers.",
+            "panel.millenaire.bld.quarry.role": "Building Materials",
+            "panel.millenaire.bld.inn.title": "Inn / Tavern",
+            "panel.millenaire.bld.inn.desc": "Convivial gathering place serving cider or wine, fostering social ties and welcoming itinerant merchants.",
+            "panel.millenaire.bld.inn.role": "Trade & Hospitality",
+            "panel.millenaire.bld.house.title": "Residential House",
+            "panel.millenaire.bld.house.desc": "Family home sheltering a villager couple and their children, contributing to demographic growth.",
+            "panel.millenaire.bld.house.role": "Housing & Population",
+            "panel.millenaire.bld.generic.title": "Community Building",
+            "panel.millenaire.bld.generic.desc": "Established village structure contributing to local development, organization, or heritage.",
+            "panel.millenaire.bld.generic.role": "Village Infrastructure",
+            "millenaire.bridge.ui.building": "Building",
+            "millenaire.bridge.ui.coords": "X: {x}, Y: {y}, Z: {z}",
+            "millenaire.bridge.ui.level": "Lvl. {level}",
+            "millenaire.bridge.ui.unknown_culture": "Unknown Culture",
+            "millenaire.bridge.ui.unknown_village": "Unknown Village",
+            "millenaire.bridge.ui.unknown_name": "Unknown",
+            "millenaire.bridge.ui.villager": "Villager",
+            "relation.millenaire.neutral": "Neutral"
+        }
+    };
+
+    class MillenaireI18n {
         constructor() {
+            this.currentLocale = "fr";
+            this.dictionaries = {};
+            this.translations = {};
+            this.fallbackTranslations = {};
+            this.listeners = [];
+            this.initialized = false;
+            this.supportedLocales = {
+                "fr": { code: "fr", name: "Français", flag: "🇫🇷", file: "fr.json" },
+                "en": { code: "en", name: "English", flag: "🇬🇧", file: "en.json" }
+            };
+        }
+
+        resolveLocaleCode(rawCode) {
+            if (!rawCode || typeof rawCode !== "string") return null;
+            const norm = rawCode.toLowerCase().replace("_", "-");
+            const prefix = norm.split("-")[0];
+            if (norm === "fr" || norm === "fr-fr" || prefix === "fr") return "fr";
+            if (norm === "en" || norm === "en-us" || norm === "en-gb" || prefix === "en") return "en";
+            if (this.supportedLocales[norm]) return norm;
+            if (this.supportedLocales[prefix]) return prefix;
+            return null;
+        }
+
+        detectInitialLocale() {
+            // 1. Persisted user choice
+            try {
+                const saved = localStorage.getItem("millenaire_bridge_lang");
+                if (saved) {
+                    const match = this.resolveLocaleCode(saved);
+                    if (match) return match;
+                }
+            } catch (_) {}
+
+            // 2. Active BlueMap language
+            try {
+                const bm = (document.documentElement && document.documentElement.lang) || "";
+                if (bm) {
+                    const match = this.resolveLocaleCode(bm);
+                    if (match) return match;
+                }
+            } catch (_) {}
+
+            // 3. Browser navigator language
+            try {
+                const navLangs = (typeof navigator !== "undefined" && navigator.languages) || [(typeof navigator !== "undefined" && navigator.language) || "fr"];
+                for (const l of navLangs) {
+                    const match = this.resolveLocaleCode(l);
+                    if (match) return match;
+                }
+            } catch (_) {}
+
+            // 4. Default fallback
+            return "fr";
+        }
+
+        async init() {
+            if (this.initialized) return;
+            const targetLocale = this.detectInitialLocale();
+            this.currentLocale = targetLocale;
+            await this.loadLocale(targetLocale);
+            this.translations = this.dictionaries[targetLocale] || {};
+            
+            // Preload secondary locale in background for deep fallbacks
+            const otherLocale = targetLocale === "fr" ? "en" : "fr";
+            this.loadLocale(otherLocale).then(dict => {
+                this.fallbackTranslations = dict || {};
+            }).catch(() => {});
+
+            this.initialized = true;
+            this.setupBlueMapObserver();
+        }
+
+        setupBlueMapObserver() {
+            if (typeof MutationObserver === "undefined" || typeof document === "undefined" || !document.documentElement) return;
+            try {
+                const observer = new MutationObserver((mutations) => {
+                    for (const m of mutations) {
+                        if (m.type === "attributes" && m.attributeName === "lang") {
+                            try {
+                                const saved = localStorage.getItem("millenaire_bridge_lang");
+                                if (!saved) {
+                                    const bm = document.documentElement.lang;
+                                    const resolved = this.resolveLocaleCode(bm);
+                                    if (resolved && resolved !== this.currentLocale) {
+                                        this.setLocale(resolved);
+                                    }
+                                }
+                            } catch (_) {}
+                        }
+                    }
+                });
+                observer.observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+            } catch (_) {}
+        }
+
+        async loadLocale(locale) {
+            const norm = this.resolveLocaleCode(locale) || "fr";
+            if (this.dictionaries[norm]) {
+                return this.dictionaries[norm];
+            }
+            if (typeof fetch === "function") {
+                try {
+                    const res = await fetch(`data/lang/${norm}.json?t=${Date.now()}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        this.dictionaries[norm] = data;
+                        return data;
+                    }
+                } catch (_) {
+                    // Fallback to embedded
+                }
+            }
+            const embedded = EMBEDDED_UI_FALLBACKS[norm] || EMBEDDED_UI_FALLBACKS["fr"] || {};
+            this.dictionaries[norm] = embedded;
+            return embedded;
+        }
+
+        async setLocale(localeCode) {
+            const resolved = this.resolveLocaleCode(localeCode) || "fr";
+            this.currentLocale = resolved;
+            try {
+                if (typeof localStorage !== "undefined") {
+                    localStorage.setItem("millenaire_bridge_lang", resolved);
+                }
+            } catch (_) {}
+
+            const dict = await this.loadLocale(resolved);
+            this.translations = dict || {};
+
+            // Synchronize secondary fallback
+            const otherLocale = resolved === "fr" ? "en" : "fr";
+            if (this.dictionaries[otherLocale]) {
+                this.fallbackTranslations = this.dictionaries[otherLocale];
+            }
+
+            // Notify listeners (UI reactive re-render)
+            for (const cb of this.listeners) {
+                try {
+                    cb(resolved);
+                } catch (err) {
+                    console.error("Error in i18n locale listener:", err);
+                }
+            }
+        }
+
+        onLocaleChanged(callback) {
+            if (typeof callback === "function") {
+                this.listeners.push(callback);
+            }
+        }
+
+        has(key) {
+            if (!key) return false;
+            if (this.translations && Object.prototype.hasOwnProperty.call(this.translations, key)) return true;
+            if (this.fallbackTranslations && Object.prototype.hasOwnProperty.call(this.fallbackTranslations, key)) return true;
+            const emb = EMBEDDED_UI_FALLBACKS[this.currentLocale];
+            if (emb && Object.prototype.hasOwnProperty.call(emb, key)) return true;
+            return false;
+        }
+
+        t(key, fallback = "", params = null) {
+            if (!key) return fallback || "";
+            let val = null;
+            if (this.translations && Object.prototype.hasOwnProperty.call(this.translations, key)) {
+                val = this.translations[key];
+            }
+            if (!val && this.fallbackTranslations && Object.prototype.hasOwnProperty.call(this.fallbackTranslations, key)) {
+                val = this.fallbackTranslations[key];
+            }
+            if (!val && EMBEDDED_UI_FALLBACKS[this.currentLocale] && Object.prototype.hasOwnProperty.call(EMBEDDED_UI_FALLBACKS[this.currentLocale], key)) {
+                val = EMBEDDED_UI_FALLBACKS[this.currentLocale][key];
+            }
+            if (!val && EMBEDDED_UI_FALLBACKS["en"] && Object.prototype.hasOwnProperty.call(EMBEDDED_UI_FALLBACKS["en"], key)) {
+                val = EMBEDDED_UI_FALLBACKS["en"][key];
+            }
+            if (!val && EMBEDDED_UI_FALLBACKS["fr"] && Object.prototype.hasOwnProperty.call(EMBEDDED_UI_FALLBACKS["fr"], key)) {
+                val = EMBEDDED_UI_FALLBACKS["fr"][key];
+            }
+            if (!val) {
+                val = (fallback !== undefined && fallback !== null && fallback !== "") ? fallback : key;
+            }
+            if (params && typeof params === "object") {
+                for (const [pKey, pVal] of Object.entries(params)) {
+                    val = String(val).replaceAll(`{${pKey}}`, pVal);
+                }
+            }
+            return String(val);
+        }
+
+        translateItem(itemId, fallbackName) {
+            if (!itemId) {
+                return fallbackName || this.t("panel.millenaire.unknown_item", "Matériau inconnu");
+            }
+            if (itemId.includes(":")) {
+                const parts = itemId.split(":");
+                const ns = parts[0];
+                const name = parts.slice(1).join(":");
+                const nameNoUnderscore = name.replace(/_/g, "");
+                const nameFixed = name.replace("mudbrick", "mud_brick").replace("cookedbrick", "cooked_brick");
+                const candidates = [
+                    `item.${ns}.${name}`,
+                    `block.${ns}.${name}`,
+                    `item.${ns}.${nameFixed}`,
+                    `block.${ns}.${nameFixed}`,
+                    `item.${ns}.${nameNoUnderscore}`,
+                    `block.${ns}.${nameNoUnderscore}`
+                ];
+                for (const cand of candidates) {
+                    if (this.has(cand)) {
+                        return this.t(cand);
+                    }
+                }
+            }
+            if (this.has(itemId)) {
+                return this.t(itemId);
+            }
+            if (fallbackName && fallbackName !== itemId && !fallbackName.startsWith("minecraft:") && !fallbackName.startsWith("millenaire:")) {
+                if (this.currentLocale === "en" && STOCKPILE_FR_TO_EN[fallbackName]) {
+                    return STOCKPILE_FR_TO_EN[fallbackName];
+                }
+                if (this.currentLocale === "fr" && STOCKPILE_EN_TO_FR[fallbackName]) {
+                    return STOCKPILE_EN_TO_FR[fallbackName];
+                }
+                return fallbackName;
+            }
+            const clean = itemId.replace(/^[a-z0-9_-]+:/, "").replace(/_/g, " ");
+            return clean.charAt(0).toUpperCase() + clean.slice(1);
+        }
+    }
+
+    function resolveVillageLore(village) {
+        const i18n = window.millenaireI18n;
+        if (!village) {
+            return {
+                title: i18n.t("panel.millenaire.section.community", "Communauté Villageoise"),
+                icon: "🏘️",
+                desc: i18n.t("panel.millenaire.lore.community_desc", "Un village Millénaire autonome doté de son propre modèle économique, de ses artisans et de ses lois coutumières."),
+                specialty: i18n.t("panel.millenaire.lore.community_specialty", "Économie locale • Urbanisme dynamique • Diplomatie")
+            };
+        }
+
+        const isLone = Boolean(village.is_lone_building);
+        const cult = (village.culture || "").replace(/^millenaire:/, "");
+        const rawType = (village.village_type || "").replace(/^millenaire:/, "");
+        const cleanType = rawType.includes("/") ? rawType.split("/")[1] : rawType;
+
+        const typeKey = village.village_type_key || `villagetype.millenaire.${cult}.${cleanType}`;
+        const loreKey = village.village_type_lore_key || `travelbook.millenaire.${cult}.village.${cleanType}.desc`;
+        const cultureKey = village.culture_key || `culture.millenaire.${cult}`;
+
+        const defaultTitle = isLone
+            ? i18n.t("panel.millenaire.badge.lone_building", "Bâtiment Isolé")
+            : i18n.t("panel.millenaire.section.community", "Communauté Villageoise");
+        const title = i18n.t(typeKey, village.village_type_name || defaultTitle);
+
+        const defaultDesc = isLone
+            ? i18n.t("panel.millenaire.lore.lone_building_desc", "Un avant-poste indépendant ou une demeure autonome vivant en autarcie dans la nature sans gouvernance de village.")
+            : i18n.t("panel.millenaire.lore.community_desc", "Un village Millénaire autonome doté de son propre modèle économique, de ses artisans et de ses lois coutumières.");
+        const desc = i18n.t(loreKey, defaultDesc);
+
+        const cultName = i18n.t(cultureKey, village.culture_name || cult);
+        const specialty = isLone
+            ? i18n.t("panel.millenaire.lore.lone_specialty", "Autarcie • Commerce autonome • Présence locale")
+            : (cultName ? `${cultName} • ${title}` : i18n.t("panel.millenaire.lore.community_specialty", "Économie locale • Urbanisme dynamique • Diplomatie"));
+
+        const icon = getVillageTypeIcon(cleanType, cult, isLone);
+
+        return { title, desc, specialty, icon };
+    }
+
+    function resolveBuildingLore(planId, name, planKey) {
+        const p = (planId || "").toLowerCase();
+        const n = (name || "").toLowerCase();
+        const i18n = window.millenaireI18n;
+
+        let matchedCat = null;
+        for (const b of BUILDING_CATEGORIES) {
+            if (b.test(p, n)) {
+                matchedCat = b;
+                break;
+            }
+        }
+
+        const fallbackTitle = matchedCat ? i18n.t(matchedCat.titleKey, matchedCat.fallbackTitle) : i18n.t("panel.millenaire.bld.generic.title", "Bâtiment Communautaire");
+        const title = planKey ? i18n.t(planKey, name || fallbackTitle) : (name || fallbackTitle);
+
+        let desc = "";
+        if (planKey && planKey.startsWith("building.millenaire.")) {
+            const tbKey = planKey.replace("building.millenaire.", "travelbook.millenaire.") + ".desc";
+            if (i18n.has(tbKey)) {
+                desc = i18n.t(tbKey);
+            }
+        }
+
+        if (!desc && matchedCat) {
+            desc = i18n.t(matchedCat.descKey, matchedCat.fallbackDesc);
+        }
+        if (!desc) {
+            desc = i18n.t("panel.millenaire.bld.generic.desc", "Structure villageoise établie contribuant à l'essor, à l'organisation ou au patrimoine de la communauté locale.");
+        }
+
+        const role = matchedCat
+            ? i18n.t(matchedCat.roleKey, matchedCat.fallbackRole)
+            : i18n.t("panel.millenaire.bld.generic.role", "Infrastructure du village");
+
+        const icon = matchedCat ? matchedCat.icon : "🏛️";
+
+        return { title, desc, role, icon };
+    }
+
+    class MillenairePanelController {
+        constructor(i18n) {
+            this.i18n = i18n || window.millenaireI18n;
             this.activeVillageId = null;
             this.currentVillage = null;
             this.detailsData = null;
@@ -330,12 +851,12 @@
             this.launcherBtn = document.createElement("button");
             this.launcherBtn.id = "millenaire-launcher-btn";
             this.launcherBtn.className = "millenaire-launcher-btn";
-            this.launcherBtn.title = "Afficher l'annuaire des villages Millénaire";
+            this.launcherBtn.title = this.i18n.t("panel.millenaire.directory.toggle_button", "Afficher l'annuaire des villages Millénaire");
             this.launcherBtn.setAttribute("type", "button");
-            this.launcherBtn.setAttribute("aria-label", "Annuaire des villages Millénaire");
+            this.launcherBtn.setAttribute("aria-label", this.i18n.t("panel.millenaire.directory.title", "Annuaire des villages Millénaire"));
             this.launcherBtn.innerHTML = `
                 <span class="launcher-icon" aria-hidden="true">🏰</span>
-                <span class="launcher-label">Villages</span>
+                <span class="launcher-label">${escapeHtml(this.i18n.t("panel.millenaire.directory.villages_tab", "Villages"))}</span>
                 <span id="millenaire-village-count" class="launcher-count">…</span>
             `;
             
@@ -346,19 +867,25 @@
             this.directoryModal.id = "millenaire-directory-panel";
             this.directoryModal.className = "millenaire-directory hidden";
             this.directoryModal.setAttribute("role", "dialog");
-            this.directoryModal.setAttribute("aria-label", "Annuaire des villages Millénaire");
+            this.directoryModal.setAttribute("aria-label", this.i18n.t("panel.millenaire.directory.title", "Annuaire des villages Millénaire"));
             this.directoryModal.innerHTML = `
                 <div class="dir-header">
                     <div class="dir-title-row">
-                        <span class="dir-title">🏰 Annuaire des Villages Millénaire</span>
-                        <button id="dir-close-btn" class="close-btn" type="button" title="Fermer" aria-label="Fermer l'annuaire">✕</button>
+                        <span class="dir-title">🏰 ${escapeHtml(this.i18n.t("panel.millenaire.directory.title", "Annuaire des Villages Millénaire"))}</span>
+                        <div class="dir-title-actions">
+                            <select class="mil-lang-select" aria-label="${escapeHtml(this.i18n.t("panel.millenaire.lang_selector_aria", "Choisir la langue / Select language"))}">
+                                <option value="fr"${this.i18n.currentLocale === "fr" ? " selected" : ""}>🇫🇷 FR</option>
+                                <option value="en"${this.i18n.currentLocale === "en" ? " selected" : ""}>🇬🇧 EN</option>
+                            </select>
+                            <button id="dir-close-btn" class="close-btn" type="button" title="${escapeHtml(this.i18n.t("panel.millenaire.button.close", "Fermer"))}" aria-label="${escapeHtml(this.i18n.t("panel.millenaire.button.close_directory", "Fermer l'annuaire"))}">✕</button>
+                        </div>
                     </div>
                     <div class="dir-controls">
-                        <input type="text" id="dir-search-input" class="dir-search" placeholder="Rechercher un village ou une culture..." aria-label="Recherche" />
+                        <input type="text" id="dir-search-input" class="dir-search" placeholder="${escapeHtml(this.i18n.t("panel.millenaire.directory.search_placeholder", "Rechercher un village ou une culture..."))}" aria-label="${escapeHtml(this.i18n.t("panel.millenaire.directory.search_label", "Recherche"))}" />
                         <div class="dir-filters" role="group" aria-label="Filtrer par type">
-                            <button class="filter-chip active" type="button" data-filter="all">Tous</button>
-                            <button class="filter-chip" type="button" data-filter="villages">Villages</button>
-                            <button class="filter-chip" type="button" data-filter="lone">Isolés</button>
+                            <button class="filter-chip active" type="button" data-filter="all">${escapeHtml(this.i18n.t("panel.millenaire.directory.filter_all", "Tous"))}</button>
+                            <button class="filter-chip" type="button" data-filter="villages">${escapeHtml(this.i18n.t("panel.millenaire.directory.filter_villages", "Villages"))}</button>
+                            <button class="filter-chip" type="button" data-filter="lone">${escapeHtml(this.i18n.t("panel.millenaire.directory.filter_lone", "Isolés"))}</button>
                         </div>
                     </div>
                 </div>
@@ -371,27 +898,31 @@
             this.container.id = "millenaire-side-panel";
             this.container.className = "millenaire-panel hidden";
             this.container.setAttribute("role", "region");
-            this.container.setAttribute("aria-label", "Détails du village Millénaire");
+            this.container.setAttribute("aria-label", this.i18n.t("panel.millenaire.panel_details_aria", "Détails du village Millénaire"));
             this.container.innerHTML = `
                 <div class="panel-header">
                     <div class="title-row">
                         <span id="panel-crest" class="culture-crest" aria-hidden="true">🏛️</span>
-                        <h2 id="panel-village-name">Nom du Village</h2>
-                        <button id="panel-list-btn" class="icon-btn" type="button" title="Retour à l'annuaire" aria-label="Retour à la liste des villages">📋</button>
-                        <button id="panel-close-btn" class="close-btn" type="button" title="Fermer le panneau" aria-label="Fermer le panneau">✕</button>
+                        <h2 id="panel-village-name">${escapeHtml(this.i18n.t("millenaire.bridge.ui.unknown_village", "Nom du Village"))}</h2>
+                        <select class="mil-lang-select" aria-label="${escapeHtml(this.i18n.t("panel.millenaire.lang_selector_aria", "Choisir la langue / Select language"))}">
+                            <option value="fr"${this.i18n.currentLocale === "fr" ? " selected" : ""}>🇫🇷 FR</option>
+                            <option value="en"${this.i18n.currentLocale === "en" ? " selected" : ""}>🇬🇧 EN</option>
+                        </select>
+                        <button id="panel-list-btn" class="icon-btn" type="button" title="${escapeHtml(this.i18n.t("panel.millenaire.button.back_to_directory", "Retour à l'annuaire"))}" aria-label="${escapeHtml(this.i18n.t("panel.millenaire.button.back_to_list", "Retour à la liste des villages"))}">📋</button>
+                        <button id="panel-close-btn" class="close-btn" type="button" title="${escapeHtml(this.i18n.t("panel.millenaire.button.close_panel", "Fermer le panneau"))}" aria-label="${escapeHtml(this.i18n.t("panel.millenaire.button.close_panel", "Fermer le panneau"))}">✕</button>
                     </div>
                     <div class="sub-row">
-                        <span id="panel-culture" class="badge">Normand</span>
-                        <button type="button" id="panel-type" class="type-pill has-tooltip" title="Cliquer ou survoler pour la description">Village <span class="tip-icon">ℹ️</span></button>
-                        <span id="panel-coords" class="coords" title="Coordonnées du centre">X: 0, Y: 0, Z: 0</span>
-                        <button id="panel-focus-btn" class="focus-btn" type="button" title="Centrer la vue 3D">📍 Centrer</button>
+                        <span id="panel-culture" class="badge">${escapeHtml(this.i18n.t("millenaire.bridge.ui.unknown_culture", "Culture"))}</span>
+                        <button type="button" id="panel-type" class="type-pill has-tooltip" title="${escapeHtml(this.i18n.t("panel.millenaire.type_pill_title", "Cliquer ou survoler pour la description"))}">${escapeHtml(this.i18n.t("panel.millenaire.section.community", "Village"))} <span class="tip-icon">ℹ️</span></button>
+                        <span id="panel-coords" class="coords" title="${escapeHtml(this.i18n.t("panel.millenaire.coords_title", "Coordonnées du centre"))}">X: 0, Y: 0, Z: 0</span>
+                        <button id="panel-focus-btn" class="focus-btn" type="button" title="${escapeHtml(this.i18n.t("panel.millenaire.focus_btn_title", "Centrer la vue 3D"))}">📍 ${escapeHtml(this.i18n.t("panel.millenaire.focus_btn_text", "Centrer"))}</button>
                     </div>
                     <div id="panel-QuickStats" class="quick-stats-bar"></div>
                 </div>
                 <div class="panel-tabs" role="tablist">
-                    <button class="tab-btn active" role="tab" aria-selected="true" data-tab="census">👥 Population</button>
-                    <button class="tab-btn" role="tab" aria-selected="false" data-tab="economy">📦 Économie & Travaux</button>
-                    <button class="tab-btn" role="tab" aria-selected="false" data-tab="diplomacy">🤝 Diplomatie</button>
+                    <button class="tab-btn active" role="tab" aria-selected="true" data-tab="census">${escapeHtml(this.i18n.t("panel.millenaire.tab.population", "👥 Population"))}</button>
+                    <button class="tab-btn" role="tab" aria-selected="false" data-tab="economy">${escapeHtml(this.i18n.t("panel.millenaire.tab.economy", "📦 Économie & Travaux"))}</button>
+                    <button class="tab-btn" role="tab" aria-selected="false" data-tab="diplomacy">${escapeHtml(this.i18n.t("panel.millenaire.tab.diplomacy", "🤝 Diplomatie"))}</button>
                 </div>
                 <div class="panel-body">
                     <div id="tab-census" class="tab-content active" role="tabpanel"></div>
@@ -399,7 +930,7 @@
                     <div id="tab-diplomacy" class="tab-content" role="tabpanel"></div>
                 </div>
                 <div class="panel-footer">
-                    <span id="panel-timestamp">Synchronisation en temps réel</span>
+                    <span id="panel-timestamp">${escapeHtml(this.i18n.t("panel.millenaire.sync_realtime", "Synchronisation en temps réel"))}</span>
                 </div>
             `;
             document.body.appendChild(this.container);
@@ -414,11 +945,11 @@
             this.tooltipEl.innerHTML = `
                 <div class="mil-tooltip-header">
                     <span class="mil-tooltip-icon">ℹ️</span>
-                    <span class="mil-tooltip-title">Titre</span>
+                    <span class="mil-tooltip-title">${escapeHtml(this.i18n.t("panel.millenaire.tooltip.title", "Titre"))}</span>
                 </div>
-                <div class="mil-tooltip-body">Description</div>
+                <div class="mil-tooltip-body">${escapeHtml(this.i18n.t("panel.millenaire.tooltip.desc", "Description"))}</div>
                 <div class="mil-tooltip-footer">
-                    <span class="mil-tooltip-tag">Spécialité</span>
+                    <span class="mil-tooltip-tag">${escapeHtml(this.i18n.t("panel.millenaire.tooltip.tag", "Spécialité"))}</span>
                 </div>
             `;
             document.body.appendChild(this.tooltipEl);
@@ -443,15 +974,13 @@
             const tipHeight = 120;
 
             let left = rect.left + (rect.width / 2) - (tipWidth / 2);
-            let top = rect.bottom + 8; // Default below
+            let top = rect.bottom + 8;
 
-            // Boundary checks
             if (left < 10) left = 10;
             if (left + tipWidth > window.innerWidth - 10) {
                 left = window.innerWidth - tipWidth - 10;
             }
             if (top + tipHeight > window.innerHeight - 10) {
-                // Flip to above
                 top = Math.max(10, rect.top - tipHeight - 8);
             }
 
@@ -472,7 +1001,7 @@
             const controlBar = document.querySelector(".control-bar");
             if (controlBar) {
                 const greedySpace = controlBar.querySelector(".space.greedy");
-                if (greedySpace && this.launcherBtn.parentElement !== controlBar) {
+                if (greedySpace && this.launcherBtn.parentElement !== controlBar && typeof controlBar.insertBefore === "function") {
                     controlBar.insertBefore(this.launcherBtn, greedySpace);
                     this.launcherBtn.classList.add("in-control-bar");
                     return;
@@ -505,6 +1034,80 @@
             this.directoryModal.classList.add("hidden");
         }
 
+        updateStaticLabels() {
+            // Update launcher button
+            if (this.launcherBtn) {
+                this.launcherBtn.title = this.i18n.t("panel.millenaire.directory.toggle_button", "Afficher l'annuaire des villages Millénaire");
+                this.launcherBtn.setAttribute("aria-label", this.i18n.t("panel.millenaire.directory.title", "Annuaire des villages Millénaire"));
+                const label = this.launcherBtn.querySelector(".launcher-label");
+                if (label) label.textContent = this.i18n.t("panel.millenaire.directory.villages_tab", "Villages");
+            }
+
+            // Update directory drawer
+            if (this.directoryModal) {
+                this.directoryModal.setAttribute("aria-label", this.i18n.t("panel.millenaire.directory.title", "Annuaire des villages Millénaire"));
+                const dirTitle = this.directoryModal.querySelector(".dir-title");
+                if (dirTitle) dirTitle.textContent = "🏰 " + this.i18n.t("panel.millenaire.directory.title", "Annuaire des Villages Millénaire");
+                const dirClose = this.directoryModal.querySelector("#dir-close-btn");
+                if (dirClose) {
+                    dirClose.title = this.i18n.t("panel.millenaire.button.close", "Fermer");
+                    dirClose.setAttribute("aria-label", this.i18n.t("panel.millenaire.button.close_directory", "Fermer l'annuaire"));
+                }
+                const searchInput = this.directoryModal.querySelector("#dir-search-input");
+                if (searchInput) {
+                    searchInput.placeholder = this.i18n.t("panel.millenaire.directory.search_placeholder", "Rechercher un village ou une culture...");
+                    searchInput.setAttribute("aria-label", this.i18n.t("panel.millenaire.directory.search_label", "Recherche"));
+                }
+                const chipAll = this.directoryModal.querySelector('[data-filter="all"]');
+                if (chipAll) chipAll.textContent = this.i18n.t("panel.millenaire.directory.filter_all", "Tous");
+                const chipVillages = this.directoryModal.querySelector('[data-filter="villages"]');
+                if (chipVillages) chipVillages.textContent = this.i18n.t("panel.millenaire.directory.filter_villages", "Villages");
+                const chipLone = this.directoryModal.querySelector('[data-filter="lone"]');
+                if (chipLone) chipLone.textContent = this.i18n.t("panel.millenaire.directory.filter_lone", "Isolés");
+            }
+
+            // Update side panel
+            if (this.container) {
+                this.container.setAttribute("aria-label", this.i18n.t("panel.millenaire.panel_details_aria", "Détails du village Millénaire"));
+                const listBtn = this.container.querySelector("#panel-list-btn");
+                if (listBtn) {
+                    listBtn.title = this.i18n.t("panel.millenaire.button.back_to_directory", "Retour à l'annuaire");
+                    listBtn.setAttribute("aria-label", this.i18n.t("panel.millenaire.button.back_to_list", "Retour à la liste des villages"));
+                }
+                const panelClose = this.container.querySelector("#panel-close-btn");
+                if (panelClose) {
+                    panelClose.title = this.i18n.t("panel.millenaire.button.close_panel", "Fermer le panneau");
+                    panelClose.setAttribute("aria-label", this.i18n.t("panel.millenaire.button.close_panel", "Fermer le panneau"));
+                }
+                const focusBtn = this.container.querySelector("#panel-focus-btn");
+                if (focusBtn) {
+                    focusBtn.title = this.i18n.t("panel.millenaire.focus_btn_title", "Centrer la vue 3D");
+                    focusBtn.textContent = "📍 " + this.i18n.t("panel.millenaire.focus_btn_text", "Centrer");
+                }
+                const tabCensus = this.container.querySelector('[data-tab="census"]');
+                if (tabCensus) tabCensus.textContent = this.i18n.t("panel.millenaire.tab.population", "👥 Population");
+                const tabEcon = this.container.querySelector('[data-tab="economy"]');
+                if (tabEcon) tabEcon.textContent = this.i18n.t("panel.millenaire.tab.economy", "📦 Économie & Travaux");
+                const tabDiplo = this.container.querySelector('[data-tab="diplomacy"]');
+                if (tabDiplo) tabDiplo.textContent = this.i18n.t("panel.millenaire.tab.diplomacy", "🤝 Diplomatie");
+            }
+
+            // Synchronize all language selector selects
+            document.querySelectorAll(".mil-lang-select").forEach(sel => {
+                sel.value = this.i18n.currentLocale;
+            });
+
+            // Trigger reactive re-renders immediately without page reload
+            if (!this.directoryModal.classList.contains("hidden") || this.detailsData) {
+                this.renderDirectory();
+            }
+            if (this.currentVillage && !this.container.classList.contains("hidden")) {
+                this.lastVillageSnapshot = null;
+                this.render(this.currentVillage, false);
+            }
+            this.hideTooltip();
+        }
+
         bindEvents() {
             // Direct click on button
             this.launcherBtn.addEventListener("click", (e) => {
@@ -513,7 +1116,7 @@
                 this.toggleDirectory();
             });
 
-            // Delegated global click for launcher button (immune to DOM replacements)
+            // Delegated global click for launcher button
             document.addEventListener("click", (evt) => {
                 const btn = evt.target.closest("#millenaire-launcher-btn, .millenaire-launcher-btn");
                 if (btn) {
@@ -523,13 +1126,12 @@
                     return;
                 }
 
-                // Close tooltip when clicking elsewhere
                 if (!evt.target.closest(".has-tooltip, #millenaire-tooltip")) {
                     this.hideTooltip();
                 }
             });
 
-            // Global Escape key handling to close tooltip, directory, or side panel
+            // Global Escape key handling
             document.addEventListener("keydown", (evt) => {
                 if (evt.key === "Escape") {
                     if (this.tooltipEl && this.tooltipEl.classList.contains("visible")) {
@@ -547,9 +1149,11 @@
                 }
             });
 
-            this.directoryModal.querySelector("#dir-close-btn").addEventListener("click", () => this.closeDirectory());
+            const dirClose = this.directoryModal.querySelector("#dir-close-btn");
+            if (dirClose) dirClose.addEventListener("click", () => this.closeDirectory());
 
-            this.directoryModal.querySelector("#dir-search-input").addEventListener("input", (e) => {
+            const dirSearch = this.directoryModal.querySelector("#dir-search-input");
+            if (dirSearch) dirSearch.addEventListener("input", (e) => {
                 this.searchQuery = (e.target.value || "").trim().toLowerCase();
                 this.renderDirectory();
             });
@@ -563,8 +1167,11 @@
                 });
             });
 
-            this.container.querySelector("#panel-close-btn").addEventListener("click", () => this.close());
-            this.container.querySelector("#panel-list-btn").addEventListener("click", () => {
+            const panelClose = this.container.querySelector("#panel-close-btn");
+            if (panelClose) panelClose.addEventListener("click", () => this.close());
+
+            const panelList = this.container.querySelector("#panel-list-btn");
+            if (panelList) panelList.addEventListener("click", () => {
                 this.openDirectory();
             });
 
@@ -574,7 +1181,8 @@
                 });
             });
 
-            this.container.querySelector("#panel-focus-btn").addEventListener("click", () => {
+            const panelFocus = this.container.querySelector("#panel-focus-btn");
+            if (panelFocus) panelFocus.addEventListener("click", () => {
                 if (this.currentVillage) {
                     const c = this.currentVillage.center;
                     this.focusCamera(c?.x ?? 0, c?.y ?? 64, c?.z ?? 0);
@@ -583,37 +1191,35 @@
 
             // Village Type Header Tooltip Trigger
             const panelTypeBtn = this.container.querySelector("#panel-type");
-            const showVillageTypeTip = () => {
-                if (!this.currentVillage) return;
-                const lore = resolveVillageLore(
-                    this.currentVillage.culture,
-                    this.currentVillage.village_type,
-                    this.currentVillage.is_lone_building,
-                    this.currentVillage.village_type_name
-                );
-                this.showTooltip(panelTypeBtn, lore.title, lore.desc, lore.specialty, lore.icon);
-            };
+            if (panelTypeBtn) {
+                const showVillageTypeTip = () => {
+                    if (!this.currentVillage) return;
+                    const lore = resolveVillageLore(this.currentVillage);
+                    this.showTooltip(panelTypeBtn, lore.title, lore.desc, lore.specialty, lore.icon);
+                };
 
-            panelTypeBtn.addEventListener("mouseenter", showVillageTypeTip);
-            panelTypeBtn.addEventListener("mouseleave", () => this.hideTooltip());
-            panelTypeBtn.addEventListener("focus", showVillageTypeTip);
-            panelTypeBtn.addEventListener("blur", () => this.hideTooltip());
-            panelTypeBtn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                if (this.tooltipEl.classList.contains("visible")) {
-                    this.hideTooltip();
-                } else {
-                    showVillageTypeTip();
-                }
-            });
+                panelTypeBtn.addEventListener("mouseenter", showVillageTypeTip);
+                panelTypeBtn.addEventListener("mouseleave", () => this.hideTooltip());
+                panelTypeBtn.addEventListener("focus", showVillageTypeTip);
+                panelTypeBtn.addEventListener("blur", () => this.hideTooltip());
+                panelTypeBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    if (this.tooltipEl && this.tooltipEl.classList.contains("visible")) {
+                        this.hideTooltip();
+                    } else {
+                        showVillageTypeTip();
+                    }
+                });
+            }
 
             // Delegate tooltips on buildings
             document.addEventListener("mouseover", (evt) => {
                 const bldEl = evt.target.closest(".bld-clickable.has-tooltip");
                 if (bldEl) {
                     const planId = bldEl.dataset.bldPlan || "";
+                    const planKey = bldEl.dataset.bldPlanKey || "";
                     const name = bldEl.dataset.bldName || "";
-                    const lore = resolveBuildingLore(planId, name);
+                    const lore = resolveBuildingLore(planId, name, planKey);
                     this.showTooltip(bldEl, lore.title, lore.desc, lore.role, lore.icon);
                 }
             });
@@ -652,6 +1258,20 @@
                 }
             }, true);
 
+            // Bind change on all language selects
+            document.addEventListener("change", (e) => {
+                const sel = e.target.closest(".mil-lang-select");
+                if (sel) {
+                    const chosen = sel.value;
+                    this.i18n.setLocale(chosen);
+                }
+            });
+
+            // React to i18n locale change
+            this.i18n.onLocaleChanged(() => {
+                this.updateStaticLabels();
+            });
+
             this.installObjectMarkerInterceptor();
         }
 
@@ -679,9 +1299,11 @@
             }
         }
 
-        installObjectMarkerInterceptor() {
+        installObjectMarkerInterceptor(retries = 30) {
             if (!window.BlueMap || !window.BlueMap.ObjectMarker) {
-                setTimeout(() => this.installObjectMarkerInterceptor(), 200);
+                if (retries > 0) {
+                    setTimeout(() => this.installObjectMarkerInterceptor(retries - 1), 200);
+                }
                 return;
             }
             const self = this;
@@ -739,7 +1361,7 @@
                 if (!res.ok) return null;
                 this.detailsData = await res.json();
                 const villages = this.detailsData?.villages ?? [];
-                const countEl = document.getElementById("millenaire-village-count");
+                const countEl = (this.launcherBtn && this.launcherBtn.querySelector("#millenaire-village-count")) || (document.getElementById ? document.getElementById("millenaire-village-count") : null);
                 if (countEl) {
                     countEl.textContent = String(villages.length);
                 }
@@ -765,7 +1387,7 @@
         }
 
         renderDirectory() {
-            const listEl = document.getElementById("dir-village-list");
+            const listEl = this.directoryModal ? this.directoryModal.querySelector("#dir-village-list") : (document.getElementById ? document.getElementById("dir-village-list") : null);
             if (!listEl) return;
             const villages = (this.detailsData?.villages ?? []).slice();
 
@@ -775,9 +1397,11 @@
                 if (this.filterMode === "lone" && !isLone) return false;
                 if (this.searchQuery) {
                     const nameMatch = (v.name ?? "").toLowerCase().includes(this.searchQuery);
-                    const cultMatch = (v.culture_name ?? v.culture ?? "").toLowerCase().includes(this.searchQuery);
-                    const typeMatch = (v.village_type_name ?? v.village_type ?? "").toLowerCase().includes(this.searchQuery);
-                    return nameMatch || cultMatch || typeMatch;
+                    const cultLocal = this.i18n.t(v.culture_key, v.culture_name ?? v.culture).toLowerCase();
+                    const cultRaw = (v.culture_name ?? v.culture ?? "").toLowerCase();
+                    const typeLocal = this.i18n.t(v.village_type_key, v.village_type_name ?? v.village_type).toLowerCase();
+                    const typeRaw = (v.village_type_name ?? v.village_type ?? "").toLowerCase();
+                    return nameMatch || cultLocal.includes(this.searchQuery) || cultRaw.includes(this.searchQuery) || typeLocal.includes(this.searchQuery) || typeRaw.includes(this.searchQuery);
                 }
                 return true;
             });
@@ -788,11 +1412,11 @@
                 if (loneA !== loneB) return loneA - loneB;
                 const popDiff = (b.population?.total ?? 0) - (a.population?.total ?? 0);
                 if (popDiff !== 0) return popDiff;
-                return (a.name ?? "").localeCompare(b.name ?? "");
+                return (a.name ?? "").localeCompare(b.name ?? "", this.i18n.currentLocale);
             });
 
             if (filtered.length === 0) {
-                listEl.innerHTML = `<div class="empty-state">Aucun village correspondant trouvé.</div>`;
+                listEl.innerHTML = `<div class="empty-state">${escapeHtml(this.i18n.t("panel.millenaire.directory.empty", "Aucun village correspondant trouvé."))}</div>`;
                 return;
             }
 
@@ -809,22 +1433,29 @@
                 const cz = v.center?.z ?? 0;
                 const isSelected = v.id === this.activeVillageId;
 
+                const villageName = v.name ?? this.i18n.t("millenaire.bridge.ui.unknown_village", "Village");
+                const cultName = this.i18n.t(v.culture_key, v.culture_name ?? v.culture);
+                const habLabel = this.i18n.t("panel.millenaire.stat.inhabitants_short", "hab.");
+                const bldLabel = this.i18n.t("panel.millenaire.stat.buildings_short", "bât.");
+                const relLabel = this.i18n.t("panel.millenaire.stat.relations_short", "rel.");
+                const gotoTitle = this.i18n.t("panel.millenaire.directory.goto_title", "Centrer et inspecter");
+
                 return `
                     <div class="dir-item ${isSelected ? "selected" : ""}" data-village-id="${escapeHtml(v.id)}" role="button" tabindex="0">
                         <div class="dir-item-crest" style="background: ${color}22; border-color: ${color}">${icon}</div>
                         <div class="dir-item-main">
                             <div class="dir-item-top">
-                                <span class="dir-item-name">${escapeHtml(v.name ?? "Village")}</span>
-                                <span class="dir-item-culture" style="background: ${color}">${escapeHtml(v.culture_name ?? v.culture)}</span>
+                                <span class="dir-item-name">${escapeHtml(villageName)}</span>
+                                <span class="dir-item-culture" style="background: ${color}">${escapeHtml(cultName)}</span>
                             </div>
                             <div class="dir-item-meta">
-                                <span>👤 ${pop} hab.</span>
-                                <span>🏛️ ${bldCount} bât.</span>
-                                ${relCount > 0 ? `<span>🤝 ${relCount} rel.</span>` : ""}
+                                <span>👤 ${pop} ${escapeHtml(habLabel)}</span>
+                                <span>🏛️ ${bldCount} ${escapeHtml(bldLabel)}</span>
+                                ${relCount > 0 ? `<span>🤝 ${relCount} ${escapeHtml(relLabel)}</span>` : ""}
                                 <span class="dir-coords tabular-num">[${cx}, ${cy}, ${cz}]</span>
                             </div>
                         </div>
-                        <span class="dir-goto-btn" aria-hidden="true" title="Centrer et inspecter">📍</span>
+                        <span class="dir-goto-btn" aria-hidden="true" title="${escapeHtml(gotoTitle)}">📍</span>
                     </div>
                 `;
             }).join("");
@@ -892,7 +1523,7 @@
                     <summary class="section-summary">
                         <span class="section-title-wrap">
                             <span class="section-icon" aria-hidden="true">${icon}</span>
-                            <span class="section-title">${title}</span>
+                            <span class="section-title">${escapeHtml(title)}</span>
                             ${countBadge !== null && countBadge !== undefined ? `<span class="section-count-badge tabular-num">${countBadge}</span>` : ""}
                         </span>
                         <span class="section-chevron" aria-hidden="true">
@@ -910,6 +1541,7 @@
             const snapshotKey = JSON.stringify({
                 id: v.id,
                 name: v.name,
+                locale: this.i18n.currentLocale,
                 pop: v.population?.total,
                 men: v.population?.men,
                 women: v.population?.women,
@@ -940,20 +1572,24 @@
                 crestEl.textContent = getCultureIcon(v.culture);
             }
 
-            this.container.querySelector("#panel-village-name").textContent = v.name ?? "Village Inconnu";
+            this.container.querySelector("#panel-village-name").textContent = v.name ?? this.i18n.t("millenaire.bridge.ui.unknown_village", "Village Inconnu");
 
             const cultBadge = this.container.querySelector("#panel-culture");
-            cultBadge.textContent = v.culture_name ?? (v.culture ?? "Inconnu");
+            const cultName = this.i18n.t(v.culture_key, v.culture_name ?? (v.culture ?? this.i18n.t("millenaire.bridge.ui.unknown_culture", "Inconnu")));
+            cultBadge.textContent = cultName;
             cultBadge.style.background = cultureColor;
 
             const typeBadge = this.container.querySelector("#panel-type");
-            const typeLabel = v.is_lone_building ? (v.village_type_name || "Bâtiment isolé") : (v.village_type_name ?? "Village");
+            const typeFallback = v.is_lone_building ? this.i18n.t("panel.millenaire.badge.lone_building", "Bâtiment isolé") : this.i18n.t("panel.millenaire.section.community", "Village");
+            const typeLabel = this.i18n.t(v.village_type_key, v.village_type_name || typeFallback);
             typeBadge.innerHTML = `${escapeHtml(typeLabel)} <span class="tip-icon" aria-hidden="true">ℹ️</span>`;
+            typeBadge.title = this.i18n.t("panel.millenaire.type_pill_title", "Cliquer ou survoler pour la description");
 
             const cx = v.center?.x ?? 0;
             const cy = v.center?.y ?? 0;
             const cz = v.center?.z ?? 0;
             this.container.querySelector("#panel-coords").textContent = `X: ${cx}, Y: ${cy}, Z: ${cz}`;
+            this.container.querySelector("#panel-coords").title = this.i18n.t("panel.millenaire.coords_title", "Coordonnées du centre");
 
             // Quick stats bar
             const defRating = v.military?.defense_rating ?? 0;
@@ -965,64 +1601,89 @@
             if (quickBar) {
                 let statusHtml = "";
                 if (underAttack) {
-                    statusHtml = '<span class="qstat qstat-alert">🔥 Sous attaque !</span>';
+                    statusHtml = `<span class="qstat qstat-alert">${escapeHtml(this.i18n.t("panel.millenaire.badge.under_attack", "🔥 Sous attaque !"))}</span>`;
                 } else if (raidTarget) {
-                    statusHtml = `<span class="qstat qstat-raid" title="Raid en cours contre ${escapeHtml(raidTarget)}">⚔️ En raid → ${escapeHtml(raidTarget)}</span>`;
+                    const raidTitle = this.i18n.t("panel.millenaire.badge.active_raid_target", "Raid en cours contre {target}", { target: raidTarget });
+                    const raidText = this.i18n.t("panel.millenaire.badge.raiding_to", "⚔️ En raid → {target}", { target: raidTarget });
+                    statusHtml = `<span class="qstat qstat-raid" title="${escapeHtml(raidTitle)}">${escapeHtml(raidText)}</span>`;
                 } else {
-                    statusHtml = '<span class="qstat qstat-peace">🕊️ Paisible</span>';
+                    statusHtml = `<span class="qstat qstat-peace">${escapeHtml(this.i18n.t("panel.millenaire.badge.peaceful", "🕊️ Paisible"))}</span>`;
                 }
+
+                const defTitle = this.i18n.t("panel.millenaire.stat.defense_title", "Force défensive");
+                const defLabel = this.i18n.t("panel.millenaire.stat.defense_short", "Déf: ");
+                const raidTitle = this.i18n.t("panel.millenaire.stat.raid_strength_title", "Force de raid");
+                const raidLabel = this.i18n.t("panel.millenaire.stat.raid_short", "Raid: ");
+                const bldTitle = this.i18n.t("panel.millenaire.stat.buildings_count", "Nombre de bâtiments");
+                const bldLabel = this.i18n.t("panel.millenaire.stat.buildings_short_label", "Bât: ");
 
                 quickBar.innerHTML = `
                     ${statusHtml}
-                    <span class="qstat" title="Force défensive">🛡️ Déf: <b class="tabular-num">${defRating}</b></span>
-                    <span class="qstat" title="Force de raid">⚔️ Raid: <b class="tabular-num">${raidStrength}</b></span>
-                    <span class="qstat" title="Nombre de bâtiments">🏛️ Bât: <b class="tabular-num">${bldCount}</b></span>
+                    <span class="qstat" title="${escapeHtml(defTitle)}">🛡️ ${escapeHtml(defLabel)}<b class="tabular-num">${defRating}</b></span>
+                    <span class="qstat" title="${escapeHtml(raidTitle)}">⚔️ ${escapeHtml(raidLabel)}<b class="tabular-num">${raidStrength}</b></span>
+                    <span class="qstat" title="${escapeHtml(bldTitle)}">🏛️ ${escapeHtml(bldLabel)}<b class="tabular-num">${bldCount}</b></span>
                 `;
             }
 
             // Timestamp footer
             const tsEl = this.container.querySelector("#panel-timestamp");
             if (tsEl && this.detailsData?.timestamp) {
-                const dateStr = new Date(this.detailsData.timestamp).toLocaleTimeString("fr-FR");
-                tsEl.textContent = `Mis à jour à ${dateStr} • Monde : ${this.detailsData.world ?? "overworld"}`;
+                const localeTag = this.i18n.currentLocale === "fr" ? "fr-FR" : "en-US";
+                const dateStr = new Date(this.detailsData.timestamp).toLocaleTimeString(localeTag);
+                tsEl.textContent = this.i18n.t("panel.millenaire.updated_at", "Mis à jour à {time} • Monde : {world}", {
+                    time: dateStr,
+                    world: this.detailsData.world ?? "overworld"
+                });
             }
 
             // 1. POPULATION TAB
             const pop = v.population ?? {};
             const roster = pop.roster ?? [];
-            const census = document.getElementById("tab-census");
+            const census = this.container ? this.container.querySelector("#tab-census") : (document.getElementById ? document.getElementById("tab-census") : null);
+            if (!census) return;
 
             const statGridHtml = `
                 <div class="stat-grid">
-                    <div class="stat-card"><span>Population Totale</span><b class="tabular-num">${pop.total ?? 0}</b></div>
-                    <div class="stat-card"><span>Hommes</span><b class="tabular-num">${pop.men ?? 0}</b></div>
-                    <div class="stat-card"><span>Femmes</span><b class="tabular-num">${pop.women ?? 0}</b></div>
-                    <div class="stat-card"><span>Enfants</span><b class="tabular-num">${pop.children ?? 0}</b></div>
+                    <div class="stat-card"><span>${escapeHtml(this.i18n.t("panel.millenaire.stat.population", "Population Totale"))}</span><b class="tabular-num">${pop.total ?? 0}</b></div>
+                    <div class="stat-card"><span>${escapeHtml(this.i18n.t("panel.millenaire.stat.men", "Hommes"))}</span><b class="tabular-num">${pop.men ?? 0}</b></div>
+                    <div class="stat-card"><span>${escapeHtml(this.i18n.t("panel.millenaire.stat.women", "Femmes"))}</span><b class="tabular-num">${pop.women ?? 0}</b></div>
+                    <div class="stat-card"><span>${escapeHtml(this.i18n.t("panel.millenaire.stat.children", "Enfants"))}</span><b class="tabular-num">${pop.children ?? 0}</b></div>
                 </div>
             `;
 
+            const unknownNameLabel = this.i18n.t("millenaire.bridge.ui.unknown_name", "Inconnu");
+            const villagerFallbackRole = this.i18n.t("millenaire.bridge.ui.villager", "Villageois");
+            const raidBadgeLabel = this.i18n.t("panel.millenaire.badge.raiding", "⚔️ Raid");
+            const hiredBadgeLabel = this.i18n.t("panel.millenaire.badge.hired", "🤝 Embauché");
+            const killedBadgeLabel = this.i18n.t("panel.millenaire.badge.killed", "💀 Décédé");
+
             const rosterHtml = `
                 <ul class="resident-list">
-                    ${roster.length === 0 ? '<li class="empty-row"><span class="resident-name">Aucun habitant recensé.</span></li>' : roster.map(r => `
-                        <li>
-                            <div class="resident-info">
-                                <span class="resident-name">${escapeHtml(r.name ?? "Inconnu")}</span>
-                                <span class="resident-sub">${escapeHtml(r.role ?? "Villageois")}${r.home_building ? ` • 🏠 ${escapeHtml(r.home_building)}` : ""}</span>
-                            </div>
-                            <div class="resident-badges">
-                                ${r.is_combatant ? `<span class="shield-badge tabular-num" title="Force militaire: ${escapeHtml(String(r.military_strength ?? 0))}">🛡️ ${escapeHtml(String(r.military_strength ?? ""))}</span>` : ""}
-                                ${r.is_raiding ? '<span class="raid-badge">⚔️ Raid</span>' : ""}
-                                ${r.is_hired ? '<span class="hired-badge">🤝 Embauché</span>' : ""}
-                                ${r.is_killed ? '<span class="dead-badge">💀 Décédé</span>' : ""}
-                            </div>
-                        </li>
-                    `).join("")}
+                    ${roster.length === 0 ? `<li class="empty-row"><span class="resident-name">${escapeHtml(this.i18n.t("panel.millenaire.roster.no_villagers", "Aucun habitant recensé."))}</span></li>` : roster.map(r => {
+                        const roleName = this.i18n.t(r.role_key, r.role || villagerFallbackRole);
+                        const rName = r.name ?? unknownNameLabel;
+                        const strengthTitle = this.i18n.t("panel.millenaire.military_strength_title", "Force militaire: {strength}", { strength: String(r.military_strength ?? 0) });
+                        return `
+                            <li>
+                                <div class="resident-info">
+                                    <span class="resident-name">${escapeHtml(rName)}</span>
+                                    <span class="resident-sub">${escapeHtml(roleName)}${r.home_building ? ` • 🏠 ${escapeHtml(r.home_building)}` : ""}</span>
+                                </div>
+                                <div class="resident-badges">
+                                    ${r.is_combatant ? `<span class="shield-badge tabular-num" title="${escapeHtml(strengthTitle)}">🛡️ ${escapeHtml(String(r.military_strength ?? ""))}</span>` : ""}
+                                    ${r.is_raiding ? `<span class="raid-badge">${escapeHtml(raidBadgeLabel)}</span>` : ""}
+                                    ${r.is_hired ? `<span class="hired-badge">${escapeHtml(hiredBadgeLabel)}</span>` : ""}
+                                    ${r.is_killed ? `<span class="dead-badge">${escapeHtml(killedBadgeLabel)}</span>` : ""}
+                                </div>
+                            </li>
+                        `;
+                    }).join("")}
                 </ul>
             `;
 
             census.innerHTML = `
                 ${statGridHtml}
-                ${this.buildSection("sec-roster", "👥", "Registre des Habitants", roster.length, rosterHtml, true)}
+                ${this.buildSection("sec-roster", "👥", this.i18n.t("panel.millenaire.section.roster", "Registre des Habitants"), roster.length, rosterHtml, true)}
             `;
 
             // 2. ECONOMY TAB
@@ -1040,62 +1701,77 @@
             // Group repetitive wall segments
             const groupedBuildings = [];
             const wallTypes = new Map();
+            const fortLabel = this.i18n.t("panel.millenaire.buildings.fortifications", "Fortifications");
             for (const b of rawBuildings) {
                 const plan = (b.plan_id || "").toLowerCase();
                 const name = (b.name || "").toLowerCase();
-                const isWall = plan.includes("wall") || plan.includes("segment") || plan.includes("borne") || plan.includes("path") || name.includes("muraille") || name.includes("borne");
+                const isWall = plan.includes("wall") || plan.includes("segment") || plan.includes("borne") || plan.includes("path") || name.includes("muraille") || name.includes("borne") || name.includes("fortification");
                 if (isWall) {
-                    const count = wallTypes.get(b.name || "Muraille") || { count: 0, bld: b };
+                    const bldName = this.i18n.t(b.plan_key, b.name || fortLabel);
+                    const count = wallTypes.get(bldName) || { count: 0, bld: b, planKey: b.plan_key };
                     count.count++;
-                    wallTypes.set(b.name || "Muraille", count);
+                    wallTypes.set(bldName, count);
                 } else {
                     groupedBuildings.push({ isGroup: false, bld: b });
                 }
             }
             for (const [wallName, data] of wallTypes.entries()) {
-                groupedBuildings.push({ isGroup: true, name: wallName, count: data.count, bld: data.bld });
+                groupedBuildings.push({ isGroup: true, name: wallName, count: data.count, bld: data.bld, planKey: data.planKey });
             }
 
             const materialEntries = Object.entries(materialsMap);
             const foodEntries = Object.entries(foodMap);
             const totalStockKinds = materialEntries.length + foodEntries.length;
 
+            const goldLabel = this.i18n.t("panel.millenaire.economy.deniers_gold_short", "Or");
+            const silverLabel = this.i18n.t("panel.millenaire.economy.deniers_silver_short", "Argent");
+            const copperLabel = this.i18n.t("panel.millenaire.economy.deniers_copper_short", "Bronze");
+            const woodLabel = this.i18n.t("panel.millenaire.economy.wood_short", "Bois");
+            const stoneLabel = this.i18n.t("panel.millenaire.economy.stone_short", "Pierre");
+            const foodLabel = this.i18n.t("panel.millenaire.economy.food_short", "Nourriture");
+
             const treasuryHtml = `
                 <div class="coins-row">
-                    <span class="coin-pill gold">🪙 <b class="tabular-num">${gold}</b> Or</span>
-                    <span class="coin-pill silver">🥈 <b class="tabular-num">${silver}</b> Argent</span>
-                    <span class="coin-pill copper">🥉 <b class="tabular-num">${copper}</b> Bronze</span>
+                    <span class="coin-pill gold">🪙 <b class="tabular-num">${gold}</b> ${escapeHtml(goldLabel)}</span>
+                    <span class="coin-pill silver">🥈 <b class="tabular-num">${silver}</b> ${escapeHtml(silverLabel)}</span>
+                    <span class="coin-pill copper">🥉 <b class="tabular-num">${copper}</b> ${escapeHtml(copperLabel)}</span>
                 </div>
                 <div class="stat-grid stat-grid-3">
-                    <div class="stat-card"><span>🪵 Bois</span><b class="tabular-num">${wood}</b></div>
-                    <div class="stat-card"><span>🪨 Pierre</span><b class="tabular-num">${stone}</b></div>
-                    <div class="stat-card"><span>🍞 Nourriture</span><b class="tabular-num">${food}</b></div>
+                    <div class="stat-card"><span>🪵 ${escapeHtml(woodLabel)}</span><b class="tabular-num">${wood}</b></div>
+                    <div class="stat-card"><span>🪨 ${escapeHtml(stoneLabel)}</span><b class="tabular-num">${stone}</b></div>
+                    <div class="stat-card"><span>🍞 ${escapeHtml(foodLabel)}</span><b class="tabular-num">${food}</b></div>
                 </div>
             `;
 
             const projectsHtml = projects.length === 0
-                ? '<p class="muted-note">Aucun chantier en cours actuellement.</p>'
+                ? `<p class="muted-note">${escapeHtml(this.i18n.t("panel.millenaire.project.no_projects", "Aucun chantier en cours actuellement."))}</p>`
                 : `
                     <ul class="project-list">
                         ${projects.map(p => {
                             const pct = Math.round((p.progress ?? 0) * 100);
                             const reqs = p.required_resources ?? [];
                             const missingCount = reqs.filter(r => (r.available ?? 0) < (r.required ?? 0)).length;
+                            const projName = p.name ?? this.i18n.t("panel.millenaire.project.default_name", "Chantier");
+                            const blockedAlert = this.i18n.t("panel.millenaire.project.blocked", "⚠️ Chantier suspendu : matériaux manquants en coffres");
+                            const reqTitle = this.i18n.t("panel.millenaire.project.req_title", "Matériaux requis pour l'étape :");
+                            const missingTag = this.i18n.t("panel.millenaire.project.missing_count", "⚠️ {count} manquant(s)", { count: missingCount });
+                            const readyTag = this.i18n.t("panel.millenaire.project.ready_tag", "✓ Approvisionné");
+
                             return `
                                 <li class="project-card ${p.is_blocked ? 'is-blocked' : ''}">
                                     <div class="proj-header">
-                                        <span class="proj-name">🏗️ <b>${escapeHtml(p.name ?? "Chantier")}</b></span>
+                                        <span class="proj-name">🏗️ <b>${escapeHtml(projName)}</b></span>
                                         <span class="proj-steps tabular-num">${pct}% (${p.current_step ?? 0}/${p.total_steps ?? 0})</span>
                                     </div>
                                     <div class="progress-bar"><div class="fill" style="width: ${pct}%"></div></div>
-                                    ${p.is_blocked ? '<div class="blocked-alert">⚠️ Chantier suspendu : matériaux manquants en coffres</div>' : ''}
+                                    ${p.is_blocked ? `<div class="blocked-alert">${escapeHtml(blockedAlert)}</div>` : ''}
                                     ${reqs.length > 0 ? `
                                         <div class="resource-requirements-block">
                                             <div class="req-title-row">
-                                                <span>Matériaux requis pour l'étape :</span>
+                                                <span>${escapeHtml(reqTitle)}</span>
                                                 ${missingCount > 0
-                                                    ? `<span class="req-missing-tag">⚠️ ${missingCount} manquant${missingCount > 1 ? 's' : ''}</span>`
-                                                    : '<span class="req-ready-tag">✓ Approvisionné</span>'
+                                                    ? `<span class="req-missing-tag">${escapeHtml(missingTag)}</span>`
+                                                    : `<span class="req-ready-tag">${escapeHtml(readyTag)}</span>`
                                                 }
                                             </div>
                                             <div class="resource-need-grid">
@@ -1105,10 +1781,13 @@
                                                     const isReady = availVal >= reqVal;
                                                     const diff = reqVal - availVal;
                                                     const ratio = Math.min(100, Math.round((availVal / Math.max(1, reqVal)) * 100));
-                                                    const itemName = translateItem(r.item_id, r.item_name);
+                                                    const itemName = this.i18n.translateItem(r.item_id, r.item_name);
+                                                    const tipTitle = isReady
+                                                        ? this.i18n.t("panel.millenaire.project.resource_sufficient", "Ressource suffisante en stock")
+                                                        : this.i18n.t("panel.millenaire.project.resource_deficit", "Déficit de {diff} unités", { diff });
 
                                                     return `
-                                                        <div class="resource-gauge-card ${isReady ? 'is-ready' : 'is-missing'}" title="${isReady ? 'Ressource suffisante en stock' : `Déficit de ${diff} unités`}">
+                                                        <div class="resource-gauge-card ${isReady ? 'is-ready' : 'is-missing'}" title="${escapeHtml(tipTitle)}">
                                                             <div class="res-card-top">
                                                                 <span class="res-card-name">${escapeHtml(itemName)}</span>
                                                                 <span class="res-card-qty tabular-num">
@@ -1132,44 +1811,57 @@
                 `;
 
             const stockpilesHtml = totalStockKinds === 0
-                ? '<p class="muted-note">Aucune marchandise recensée dans les coffres.</p>'
+                ? `<p class="muted-note">${escapeHtml(this.i18n.t("panel.millenaire.stockpile.empty", "Aucune marchandise recensée dans les coffres."))}</p>`
                 : `
                     <div class="stock-chips">
-                        ${materialEntries.map(([k, val]) => `<span class="stock-chip">🧱 ${escapeHtml(k)}: <b class="tabular-num">${escapeHtml(String(val))}</b></span>`).join("")}
-                        ${foodEntries.map(([k, val]) => `<span class="stock-chip food">🍎 ${escapeHtml(k)}: <b class="tabular-num">${escapeHtml(String(val))}</b></span>`).join("")}
+                        ${materialEntries.map(([k, val]) => {
+                            const label = this.i18n.translateItem(k, k);
+                            return `<span class="stock-chip">🧱 ${escapeHtml(label)}: <b class="tabular-num">${escapeHtml(String(val))}</b></span>`;
+                        }).join("")}
+                        ${foodEntries.map(([k, val]) => {
+                            const label = this.i18n.translateItem(k, k);
+                            return `<span class="stock-chip food">🍎 ${escapeHtml(label)}: <b class="tabular-num">${escapeHtml(String(val))}</b></span>`;
+                        }).join("")}
                     </div>
                 `;
 
+            const defaultBldName = this.i18n.t("millenaire.bridge.ui.building", "Bâtiment");
+            const focusZoneTitle = this.i18n.t("panel.millenaire.buildings.click_to_focus_zone", "Cliquer pour centrer la zone");
+            const focusBldTitle = this.i18n.t("panel.millenaire.buildings.click_to_focus", "Cliquer pour centrer la caméra 3D");
+
             const buildingsHtml = rawBuildings.length === 0
-                ? '<p class="muted-note">Aucun bâtiment établi.</p>'
+                ? `<p class="muted-note">${escapeHtml(this.i18n.t("panel.millenaire.buildings.no_buildings", "Aucun bâtiment établi."))}</p>`
                 : `
                     <ul class="building-list">
                         ${groupedBuildings.map(item => {
                             if (item.isGroup) {
                                 return `
-                                    <li class="bld-clickable has-tooltip" data-bld-plan="${escapeHtml(item.bld.plan_id ?? '')}" data-bld-name="${escapeHtml(item.name)}" data-bx="${item.bld.x ?? 0}" data-by="${item.bld.y ?? 64}" data-bz="${item.bld.z ?? 0}" role="button" tabindex="0" title="Cliquer pour centrer la zone">
+                                    <li class="bld-clickable has-tooltip" data-bld-plan="${escapeHtml(item.bld.plan_id ?? '')}" data-bld-plan-key="${escapeHtml(item.planKey ?? '')}" data-bld-name="${escapeHtml(item.name)}" data-bx="${item.bld.x ?? 0}" data-by="${item.bld.y ?? 64}" data-bz="${item.bld.z ?? 0}" role="button" tabindex="0" title="${escapeHtml(focusZoneTitle)}">
                                         <span class="bld-name">🛡️ ${escapeHtml(item.name)} <span class="group-count tabular-num">×${escapeHtml(String(item.count))}</span></span>
-                                        <span class="bld-meta tabular-num">Fortifications • [${item.bld.x ?? 0}, ${item.bld.y ?? 0}, ${item.bld.z ?? 0}]</span>
+                                        <span class="bld-meta tabular-num">${escapeHtml(fortLabel)} • [${item.bld.x ?? 0}, ${item.bld.y ?? 0}, ${item.bld.z ?? 0}]</span>
                                     </li>
                                 `;
                             }
                             const b = item.bld;
+                            const bldName = this.i18n.t(b.plan_key, b.name ?? b.plan_id ?? defaultBldName);
+                            const lvlLabel = this.i18n.t("millenaire.bridge.ui.level", "Niv. {level}", { level: b.level ?? 0 });
                             return `
-                                <li class="bld-clickable has-tooltip" data-bld-plan="${escapeHtml(b.plan_id ?? '')}" data-bld-name="${escapeHtml(b.name ?? b.plan_id ?? 'Bâtiment')}" data-bx="${b.x ?? 0}" data-by="${b.y ?? 64}" data-bz="${b.z ?? 0}" role="button" tabindex="0" title="Cliquer pour centrer la caméra 3D">
-                                    <span class="bld-name">🏛️ ${escapeHtml(b.name ?? b.plan_id ?? "Bâtiment")}</span>
-                                    <span class="bld-meta tabular-num">Niv. ${b.level ?? 0} • [${b.x ?? 0}, ${b.y ?? 0}, ${b.z ?? 0}]</span>
+                                <li class="bld-clickable has-tooltip" data-bld-plan="${escapeHtml(b.plan_id ?? '')}" data-bld-plan-key="${escapeHtml(b.plan_key ?? '')}" data-bld-name="${escapeHtml(bldName)}" data-bx="${b.x ?? 0}" data-by="${b.y ?? 64}" data-bz="${b.z ?? 0}" role="button" tabindex="0" title="${escapeHtml(focusBldTitle)}">
+                                    <span class="bld-name">🏛️ ${escapeHtml(bldName)}</span>
+                                    <span class="bld-meta tabular-num">${escapeHtml(lvlLabel)} • [${b.x ?? 0}, ${b.y ?? 0}, ${b.z ?? 0}]</span>
                                 </li>
                             `;
                         }).join("")}
                     </ul>
                 `;
 
-            const economy = document.getElementById("tab-economy");
+            const economy = this.container ? this.container.querySelector("#tab-economy") : (document.getElementById ? document.getElementById("tab-economy") : null);
+            if (!economy) return;
             economy.innerHTML = `
-                ${this.buildSection("sec-treasury", "💰", "Trésorerie & Réserves Majeures", null, treasuryHtml, true)}
-                ${this.buildSection("sec-projects", "🏗️", "Chantiers de Construction", projects.length, projectsHtml, true)}
-                ${this.buildSection("sec-stockpiles", "📦", "Détail des Stocks en Coffres", totalStockKinds, stockpilesHtml, totalStockKinds <= 15)}
-                ${this.buildSection("sec-buildings", "🏛️", "Bâtiments Établis", rawBuildings.length, buildingsHtml, rawBuildings.length <= 12)}
+                ${this.buildSection("sec-treasury", "💰", this.i18n.t("panel.millenaire.economy.deniers", "Trésorerie & Réserves Majeures"), null, treasuryHtml, true)}
+                ${this.buildSection("sec-projects", "🏗️", this.i18n.t("panel.millenaire.section.projects", "Chantiers de Construction"), projects.length, projectsHtml, true)}
+                ${this.buildSection("sec-stockpiles", "📦", this.i18n.t("panel.millenaire.section.stockpiles", "Détail des Stocks en Coffres"), totalStockKinds, stockpilesHtml, totalStockKinds <= 15)}
+                ${this.buildSection("sec-buildings", "🏛️", this.i18n.t("panel.millenaire.section.buildings", "Bâtiments Établis"), rawBuildings.length, buildingsHtml, rawBuildings.length <= 12)}
             `;
 
             // Bind click & keydown on buildings
@@ -1191,19 +1883,27 @@
 
             // 3. DIPLOMACY TAB
             const relations = v.relations ?? [];
-            const diplo = document.getElementById("tab-diplomacy");
+            const diplo = this.container ? this.container.querySelector("#tab-diplomacy") : (document.getElementById ? document.getElementById("tab-diplomacy") : null);
+            if (!diplo) return;
 
             let militaryAlertHtml = "";
             if (raidTarget) {
+                const prefix = this.i18n.t("panel.millenaire.diplomacy.raid_banner_prefix", "Expédition militaire en cours :");
+                const body = this.i18n.t("panel.millenaire.diplomacy.raid_banner_body", "Ce village mène un raid offensif vers {target} !", { target: `<u>${escapeHtml(raidTarget)}</u>` });
                 militaryAlertHtml = `
                     <div class="military-raid-banner" role="alert">
-                        ⚔️ <b>Expédition militaire en cours :</b> Ce village mène un raid offensif vers <u>${escapeHtml(raidTarget)}</u> !
+                        ⚔️ <b>${escapeHtml(prefix)}</b> ${body}
                     </div>
                 `;
             }
 
+            const defaultTargetName = this.i18n.t("millenaire.bridge.ui.unknown_village", "Village Inconnu");
+            const neutralStatus = this.i18n.t("relation.millenaire.neutral", "Neutre");
+            const viewBtnLabel = this.i18n.t("panel.millenaire.diplomacy.view_btn", "Voir");
+            const viewBtnTitle = this.i18n.t("panel.millenaire.diplomacy.view_btn_title", "Centrer la carte 3D sur ce village");
+
             const relationsListHtml = relations.length === 0
-                ? '<p class="muted-note">Aucune relation diplomatique externe enregistrée pour cet établissement.</p>'
+                ? `<p class="muted-note">${escapeHtml(this.i18n.t("panel.millenaire.diplomacy.no_relations", "Aucune relation diplomatique externe enregistrée pour cet établissement."))}</p>`
                 : `
                     <ul class="diplo-list">
                         ${relations.map(rel => {
@@ -1212,23 +1912,29 @@
                             const icon = getRelationIcon(score);
                             const barWidth = Math.min(100, Math.abs(score));
                             const scorePrefix = score > 0 ? `+${score}` : `${score}`;
+                            const tName = rel.target_name ?? defaultTargetName;
+                            const tCult = this.i18n.t(rel.target_culture_key, rel.target_culture_name || "");
+                            const statusLabel = this.i18n.t(rel.status_key, rel.status || neutralStatus);
+                            const distLabel = rel.distance ? this.i18n.t("panel.millenaire.diplomacy.distance", "• Distance : {dist} m", { dist: Math.round(rel.distance) }) : "";
+                            const viewBtnAria = this.i18n.t("panel.millenaire.diplomacy.view_btn_aria", "Centrer sur {target}", { target: tName });
+
                             return `
                                 <li class="diplo-item" style="border-left: 4px solid ${colorHex}" data-target-id="${escapeHtml(rel.target_village_id ?? "")}" role="button" tabindex="0">
                                     <div class="diplo-main">
                                         <div class="diplo-info">
-                                            <span class="diplo-target-name">${icon} <b>${escapeHtml(rel.target_name ?? "Village Inconnu")}</b></span>
-                                            <span class="diplo-status tabular-num" style="color: ${colorHex}">${escapeHtml(rel.status ?? "Neutre")} (${scorePrefix})</span>
+                                            <span class="diplo-target-name">${icon} <b>${escapeHtml(tName)}</b></span>
+                                            <span class="diplo-status tabular-num" style="color: ${colorHex}">${escapeHtml(statusLabel)} (${scorePrefix})</span>
                                         </div>
                                         <div class="diplo-sub">
-                                            <span>${escapeHtml(rel.target_culture_name ?? "")}</span>
-                                            ${rel.distance ? `<span class="tabular-num">• Distance : ${Math.round(rel.distance)} m</span>` : ""}
+                                            <span>${escapeHtml(tCult)}</span>
+                                            ${distLabel ? `<span class="tabular-num">${escapeHtml(distLabel)}</span>` : ""}
                                         </div>
                                         <div class="diplo-bar-track">
                                             <div class="diplo-bar-fill" style="width: ${barWidth}%; background: ${colorHex}"></div>
                                         </div>
                                     </div>
                                     <div class="diplo-actions">
-                                        <button class="diplo-nav-btn" type="button" data-nav-id="${escapeHtml(rel.target_village_id ?? "")}" title="Centrer la carte 3D sur ce village" aria-label="Centrer sur ${escapeHtml(rel.target_name ?? 'ce village')}">📍 Voir</button>
+                                        <button class="diplo-nav-btn" type="button" data-nav-id="${escapeHtml(rel.target_village_id ?? "")}" title="${escapeHtml(viewBtnTitle)}" aria-label="${escapeHtml(viewBtnAria)}">📍 ${escapeHtml(viewBtnLabel)}</button>
                                     </div>
                                 </li>
                             `;
@@ -1238,7 +1944,7 @@
 
             diplo.innerHTML = `
                 ${militaryAlertHtml}
-                ${this.buildSection("sec-relations", "🤝", "Relations Inter-Villages", relations.length, relationsListHtml, true)}
+                ${this.buildSection("sec-relations", "🤝", this.i18n.t("panel.millenaire.section.diplomacy", "Relations Inter-Villages"), relations.length, relationsListHtml, true)}
             `;
 
             // Bind click & keydown on diplomatic items
@@ -1273,11 +1979,21 @@
         }
     }
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", () => {
-            window.MillenairePanel = new MillenairePanelController();
+    // Initialize Millenaire i18n and UI Controller
+    window.millenaireI18n = new MillenaireI18n();
+
+    function startController() {
+        window.millenaireI18n.init().then(() => {
+            window.MillenairePanel = new MillenairePanelController(window.millenaireI18n);
+        }).catch((err) => {
+            console.error("Millenaire i18n initialization failed, fallback to defaults:", err);
+            window.MillenairePanel = new MillenairePanelController(window.millenaireI18n);
         });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", startController);
     } else {
-        window.MillenairePanel = new MillenairePanelController();
+        startController();
     }
 })();

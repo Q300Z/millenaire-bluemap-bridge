@@ -33,5 +33,47 @@ public record VillageSnapshotDTO(
     List<BuildingSnapshotDTO> buildingsList,
     List<ProjectSnapshotDTO> projects,
     StockpileDTO stockpiles,
-    List<DiplomaticRelationDTO> relations
-) {}
+    List<DiplomaticRelationDTO> relations,
+    String cultureKey,
+    String villageTypeKey,
+    String villageTypeLoreKey
+) {
+    public VillageSnapshotDTO(
+        UUID id,
+        String name,
+        String cultureId,
+        String cultureName,
+        String villageTypeId,
+        String villageTypeName,
+        boolean isLoneBuilding,
+        int centerX,
+        int centerY,
+        int centerZ,
+        double boundsMinX,
+        double boundsMinY,
+        double boundsMinZ,
+        double boundsMaxX,
+        double boundsMaxY,
+        double boundsMaxZ,
+        int population,
+        int menCount,
+        int womenCount,
+        int childrenCount,
+        int defenseRating,
+        int raidStrength,
+        boolean isUnderAttack,
+        String activeRaidTarget,
+        int buildingsCount,
+        List<VillagerSnapshotDTO> roster,
+        List<BuildingSnapshotDTO> buildingsList,
+        List<ProjectSnapshotDTO> projects,
+        StockpileDTO stockpiles,
+        List<DiplomaticRelationDTO> relations
+    ) {
+        this(id, name, cultureId, cultureName, villageTypeId, villageTypeName, isLoneBuilding,
+             centerX, centerY, centerZ, boundsMinX, boundsMinY, boundsMinZ, boundsMaxX, boundsMaxY, boundsMaxZ,
+             population, menCount, womenCount, childrenCount, defenseRating, raidStrength,
+             isUnderAttack, activeRaidTarget, buildingsCount, roster, buildingsList, projects, stockpiles, relations,
+             null, null, null);
+    }
+}

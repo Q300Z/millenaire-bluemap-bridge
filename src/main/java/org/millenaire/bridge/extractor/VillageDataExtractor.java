@@ -76,6 +76,12 @@ public class VillageDataExtractor {
             Identifier cultureIdent = village.getCultureId();
             String cultureIdStr = cultureIdent != null ? cultureIdent.toString() : "millenaire:norman";
             Culture cultureObj = cultureIdent != null ? ModCultures.getCulture(cultureIdent) : null;
+
+            String cultureClean = cultureIdStr.contains(":") ? cultureIdStr.substring(cultureIdStr.indexOf(':') + 1) : cultureIdStr;
+            if ("hindi".equals(cultureClean)) {
+                cultureClean = "indian";
+            }
+            String cultureKey = "culture.millenaire." + cultureClean;
             String cultureDisplayName = MillenaireTranslationHelper.translateCulture(
                 cultureIdStr,
                 cultureObj != null ? cultureObj.displayName() : null
@@ -84,9 +90,31 @@ public class VillageDataExtractor {
             Identifier vTypeIdent = village.getVillageTypeId();
             String vTypeIdStr = vTypeIdent != null ? vTypeIdent.toString() : "";
             VillageType vTypeObj = vTypeIdent != null ? ModCultures.getVillageType(vTypeIdent) : null;
-            String vTypeName = (vTypeObj != null && vTypeObj.name() != null && !vTypeObj.name().isBlank())
-                ? vTypeObj.name()
-                : (vTypeIdStr.contains("/") ? vTypeIdStr.substring(vTypeIdStr.indexOf('/') + 1) : "Village");
+
+            String cleanType = vTypeIdStr;
+            String vTypeCulture = cultureClean;
+            if (cleanType.contains("/")) {
+                String[] parts = cleanType.split("/", 2);
+                if (parts[0].contains(":")) {
+                    vTypeCulture = parts[0].substring(parts[0].indexOf(':') + 1);
+                } else {
+                    vTypeCulture = parts[0];
+                }
+                if ("hindi".equals(vTypeCulture)) {
+                    vTypeCulture = "indian";
+                }
+                cleanType = parts[1];
+            } else if (cleanType.contains(":")) {
+                cleanType = cleanType.substring(cleanType.indexOf(':') + 1);
+            }
+            String villageTypeKey = "villagetype.millenaire." + vTypeCulture + "." + cleanType;
+            String villageTypeLoreKey = "travelbook.millenaire." + vTypeCulture + ".village." + cleanType + ".desc";
+
+            String vTypeName = MillenaireTranslationHelper.translateVillageType(
+                cultureIdStr,
+                vTypeIdStr,
+                (vTypeObj != null && vTypeObj.name() != null && !vTypeObj.name().isBlank()) ? vTypeObj.name() : cleanType
+            );
 
             boolean isLone = village.isLoneBuilding();
             BlockPos center = village.getCenter();
@@ -152,6 +180,13 @@ public class VillageDataExtractor {
                     BlockPos origin = pos != null ? pos : center;
                     if (!b.isSubBuilding() && !b.isWallSegment()) {
                         mainBuildingsCount++;
+                        String planKey;
+                        if (planSetStr.startsWith("building.")) {
+                            planKey = planSetStr;
+                        } else {
+                            planKey = "building.millenaire." + planSetStr.replace(':', '.').replace('/', '.');
+                        }
+
                         buildingsList.add(new BuildingSnapshotDTO(
                             b.getId() != null ? b.getId().uuid().toString() : "",
                             bName,
@@ -161,7 +196,8 @@ public class VillageDataExtractor {
                             origin.getY(),
                             origin.getZ(),
                             b.isBeingBuilt(),
-                            b.isSubBuilding()
+                            b.isSubBuilding(),
+                            planKey
                         ));
                     }
 
@@ -256,6 +292,13 @@ public class VillageDataExtractor {
                         vType != null ? vType.nativeName() : null
                     );
 
+                    String roleKey = null;
+                    if (rec.getRoleName() != null && rec.getRoleName().startsWith("role.")) {
+                        roleKey = rec.getRoleName();
+                    } else if (vTypeId != null) {
+                        roleKey = "role.millenaire." + vTypeId.getPath().replace('/', '_');
+                    }
+
                     String homeName = rec.getHomeBuilding() != null
                         ? buildingNamesById.getOrDefault(rec.getHomeBuilding(), "")
                         : "";
@@ -264,7 +307,6 @@ public class VillageDataExtractor {
                         vType.isHelpInAttacks() || vType.isDefensive() || vType.isRaider() || vType.isArcher()
                     );
                     int milStrength = isCombatant ? rec.getMilitaryStrength() : 0;
-                    boolean isRaiding = rec.isAwayRaiding();
 
                     roster.add(new VillagerSnapshotDTO(
                         rec.getUuid(),
@@ -272,10 +314,11 @@ public class VillageDataExtractor {
                         roleLabel,
                         homeName,
                         isCombatant,
-                        isRaiding,
+                        rec.isAwayRaiding(),
                         rec.isAwayHired(),
                         rec.isKilled(),
-                        milStrength
+                        milStrength,
+                        roleKey
                     ));
                 }
             }
@@ -314,6 +357,25 @@ public class VillageDataExtractor {
                 String targetCultId = targetVillage.getCultureId() != null ? targetVillage.getCultureId().toString() : "";
                 String targetCultName = MillenaireTranslationHelper.translateCulture(targetCultId, targetCultId);
 
+                String targetCultClean = targetCultId.contains(":") ? targetCultId.substring(targetCultId.indexOf(':') + 1) : targetCultId;
+                if ("hindi".equals(targetCultClean)) {
+                    targetCultClean = "indian";
+                }
+                String targetCultureKey = "culture.millenaire." + targetCultClean;
+
+                String statusKey;
+                if (score >= 90) statusKey = "relation.millenaire.excellent";
+                else if (score >= 70) statusKey = "relation.millenaire.verygood";
+                else if (score >= 50) statusKey = "relation.millenaire.good";
+                else if (score >= 30) statusKey = "relation.millenaire.decent";
+                else if (score >= 10) statusKey = "relation.millenaire.fair";
+                else if (score <= -90) statusKey = "relation.millenaire.openconflict";
+                else if (score <= -70) statusKey = "relation.millenaire.atrocious";
+                else if (score <= -50) statusKey = "relation.millenaire.verybad";
+                else if (score <= -30) statusKey = "relation.millenaire.bad";
+                else if (score <= -10) statusKey = "relation.millenaire.chilly";
+                else statusKey = "relation.millenaire.neutral";
+
                 relationDTOs.add(new DiplomaticRelationDTO(
                     villageUuid,
                     villageName,
@@ -325,7 +387,9 @@ public class VillageDataExtractor {
                     score,
                     MillenaireTranslationHelper.translateRelationStatus(score),
                     MillenaireTranslationHelper.getRelationColorHex(score),
-                    dist
+                    dist,
+                    targetCultureKey,
+                    statusKey
                 ));
             }
 
@@ -363,7 +427,10 @@ public class VillageDataExtractor {
                 buildingsList,
                 projects,
                 stockpiles,
-                relationDTOs
+                relationDTOs,
+                cultureKey,
+                villageTypeKey,
+                villageTypeLoreKey
             ));
         }
 
@@ -512,7 +579,7 @@ public class VillageDataExtractor {
                 int available = getAvailableCount(resId, aggregatedItems);
                 String itemName;
                 if (AnywoodHelper.isAnywood(resId)) {
-                    itemName = "Bûches (tout type)";
+                    itemName = MillenaireTranslationHelper.translateKey("item.millenaire.anywood_log", "Bûches (tout type)");
                 } else {
                     Item item = BuiltInRegistries.ITEM.getValue(resId);
                     if (item != null && item != net.minecraft.world.item.Items.AIR) {

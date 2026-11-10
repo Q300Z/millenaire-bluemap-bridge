@@ -9,19 +9,20 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.util.HexFormat;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Automates the extraction of BlueMap web assets (JS/CSS) from the mod JAR
- * directly into BlueMap's webroot, and automatically configures config/bluemap/webapp.conf.
+ * Automates the extraction and synchronization of BlueMap web assets (JS/CSS)
+ * and Millénaire merged translation dictionaries into BlueMap's webroot,
+ * and automatically configures config/bluemap/webapp.conf.
  *
- * Verifies the integrity and version of installed assets using SHA-256 checksums.
+ * Verifies the integrity of installed assets using SHA-256 checksums.
  * If files are missing, corrupted, or outdated, they are automatically restored
  * or upgraded to the exact version bundled in the mod JAR.
  *
- * Runs automatically when Minecraft starts, and can also be run standalone via `java -jar`.
- * Zero external dependencies.
+ * Runs automatically when Minecraft starts, and can also be run standalone.
  *
  * Author: Q300Z
  */
@@ -34,6 +35,8 @@ public final class WebAssetAutoInstaller {
 
     private static final String JS_TARGET_NAME = "js/millenaire_panel.js";
     private static final String CSS_TARGET_NAME = "css/millenaire_panel.css";
+
+    private static final String[] EXPORT_LOCALES = new String[] { "fr_fr", "en_us" };
 
     private WebAssetAutoInstaller() {}
 
@@ -91,11 +94,113 @@ public final class WebAssetAutoInstaller {
                 logInfo("All Millénaire BlueMap web assets in '" + webrootDir + "' match expected SHA-256 checksums.");
             }
 
-            // 3. Automatically patch webapp.conf to include JS and CSS if needed
+            // 3. Export merged language files into webroot (data/lang/)
+            exportLanguageFiles(webrootDir);
+
+            // 4. Automatically patch webapp.conf to include JS and CSS if needed
             patchWebappConf(webappConfPath);
 
         } catch (Exception e) {
             logError("Failed to execute automatic web asset installation: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Exports full merged translation dictionaries (fr_fr, en_us, fr, en) and manifest.json
+     * into <webroot>/data/lang/ for the frontend client-side i18n engine.
+     */
+    public static void exportLanguageFiles(Path webrootDir) {
+        try {
+            Path langDir = webrootDir.resolve("data").resolve("lang");
+            if (!Files.exists(langDir)) {
+                Files.createDirectories(langDir);
+            }
+
+            for (String locale : EXPORT_LOCALES) {
+                byte[] jsonBytes = resolveMergedLocaleJson(locale);
+                if (jsonBytes != null && jsonBytes.length > 0) {
+                    // Export canonical (e.g. fr_fr.json)
+                    Path canonicalPath = langDir.resolve(locale + ".json");
+                    writeIfChanged(canonicalPath, jsonBytes);
+
+                    // Export short alias (e.g. fr.json for fr_fr, en.json for en_us)
+                    String shortAlias = locale.split("_")[0];
+                    Path aliasPath = langDir.resolve(shortAlias + ".json");
+                    writeIfChanged(aliasPath, jsonBytes);
+                }
+            }
+
+            // Export manifest.json
+            String manifestJson = """
+                {
+                  "default": "fr_fr",
+                  "languages": {
+                    "fr_fr": {
+                      "code": "fr_fr",
+                      "name": "Français",
+                      "file": "fr_fr.json"
+                    },
+                    "en_us": {
+                      "code": "en_us",
+                      "name": "English",
+                      "file": "en_us.json"
+                    }
+                  }
+                }
+                """;
+            Path manifestPath = langDir.resolve("manifest.json");
+            writeIfChanged(manifestPath, manifestJson.getBytes(StandardCharsets.UTF_8));
+
+        } catch (Exception e) {
+            logError("Failed to export language files to " + webrootDir + ": " + e.getMessage(), e);
+        }
+    }
+
+    private static byte[] resolveMergedLocaleJson(String locale) {
+        try {
+            // Attempt to load from MillenaireTranslationService (fully merged official + bridge dictionaries)
+            org.millenaire.bridge.service.MillenaireTranslationService service =
+                org.millenaire.bridge.service.MillenaireTranslationService.getInstance();
+            Map<String, String> merged = service.getMergedDictionary(locale);
+            if (merged != null && !merged.isEmpty()) {
+                com.google.gson.Gson gson = new com.google.gson.GsonBuilder().disableHtmlEscaping().create();
+                String json = gson.toJson(merged);
+                return json.getBytes(StandardCharsets.UTF_8);
+            }
+        } catch (Throwable t) {
+            logWarn("Could not dynamically resolve merged dictionary via MillenaireTranslationService: " + t.getMessage());
+        }
+
+        // Fallback: load directly from bundled bridge resource
+        String resPath = "/assets/millenaire_bluemap/lang/" + locale + ".json";
+        try (InputStream in = WebAssetAutoInstaller.class.getResourceAsStream(resPath)) {
+            if (in != null) {
+                return in.readAllBytes();
+            }
+        } catch (Exception e) {
+            logWarn("Failed to read bundled bridge lang resource " + resPath + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    private static void writeIfChanged(Path path, byte[] content) {
+        try {
+            String newChecksum = computeSha256(content);
+            if (Files.exists(path)) {
+                byte[] existing = Files.readAllBytes(path);
+                String existingChecksum = computeSha256(existing);
+                if (newChecksum.equalsIgnoreCase(existingChecksum)) {
+                    return; // Up-to-date
+                }
+            }
+            Path parent = path.getParent();
+            if (parent != null && !Files.exists(parent)) {
+                Files.createDirectories(parent);
+            }
+            Files.write(path, content, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            logInfo("✓ Exported " + path.getFileName() + " [" + content.length + " bytes]");
+        } catch (Exception e) {
+            logWarn("Failed to write language file " + path + ": " + e.getMessage());
         }
     }
 

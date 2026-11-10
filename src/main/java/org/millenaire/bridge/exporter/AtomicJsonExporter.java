@@ -65,8 +65,11 @@ public class AtomicJsonExporter {
                 vMap.put("name", v.name());
                 vMap.put("culture", v.cultureId());
                 vMap.put("culture_name", v.cultureName());
+                vMap.put("culture_key", v.cultureKey());
                 vMap.put("village_type", v.villageTypeId());
                 vMap.put("village_type_name", v.villageTypeName());
+                vMap.put("village_type_key", v.villageTypeKey());
+                vMap.put("village_type_lore_key", v.villageTypeLoreKey());
                 vMap.put("is_lone_building", v.isLoneBuilding());
 
                 Map<String, Integer> centerMap = new LinkedHashMap<>();
@@ -98,6 +101,7 @@ public class AtomicJsonExporter {
                         rMap.put("uuid", r.uuid() != null ? r.uuid().toString() : "");
                         rMap.put("name", r.name());
                         rMap.put("role", r.role());
+                        rMap.put("role_key", r.roleKey());
                         rMap.put("home_building", r.homeBuilding());
                         rMap.put("is_combatant", r.isCombatant());
                         rMap.put("is_raiding", r.isRaiding());
@@ -174,6 +178,7 @@ public class AtomicJsonExporter {
                         bMap.put("id", b.id());
                         bMap.put("name", b.name());
                         bMap.put("plan_id", b.planId());
+                        bMap.put("plan_key", b.planKey());
                         bMap.put("level", b.level());
                         bMap.put("x", b.x());
                         bMap.put("y", b.y());
@@ -192,8 +197,10 @@ public class AtomicJsonExporter {
                         relMap.put("target_village_id", rel.targetVillageId().toString());
                         relMap.put("target_name", rel.targetName());
                         relMap.put("target_culture_name", rel.targetCultureName());
+                        relMap.put("target_culture_key", rel.targetCultureKey());
                         relMap.put("score", rel.score());
                         relMap.put("status", rel.statusLabel());
+                        relMap.put("status_key", rel.statusKey());
                         relMap.put("color_hex", rel.colorHex());
                         relMap.put("distance", Math.round(rel.distance() * 10.0) / 10.0);
                         relList.add(relMap);
