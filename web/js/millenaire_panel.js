@@ -314,6 +314,7 @@
             this.filterMode = "all";
             this.searchQuery = "";
             this.pollTimer = null;
+            this.isFetching = false;
             this.lastVillageSnapshot = null;
             this.sectionStates = new Map();
 
@@ -467,18 +468,19 @@
             }
         }
 
-        mountIntoControlBar() {
+        mountIntoControlBar(retries = 30) {
             const controlBar = document.querySelector(".control-bar");
             if (controlBar) {
                 const greedySpace = controlBar.querySelector(".space.greedy");
-                if (greedySpace) {
-                    if (this.launcherBtn.parentElement !== controlBar) {
-                        controlBar.insertBefore(this.launcherBtn, greedySpace);
-                        this.launcherBtn.classList.add("in-control-bar");
-                    }
+                if (greedySpace && this.launcherBtn.parentElement !== controlBar) {
+                    controlBar.insertBefore(this.launcherBtn, greedySpace);
+                    this.launcherBtn.classList.add("in-control-bar");
+                    return;
                 }
             }
-            setTimeout(() => this.mountIntoControlBar(), 500);
+            if (retries > 0) {
+                setTimeout(() => this.mountIntoControlBar(retries - 1), 500);
+            }
         }
 
         toggleDirectory() {
@@ -492,6 +494,10 @@
         openDirectory() {
             this.renderDirectory();
             this.directoryModal.classList.remove("hidden");
+            setTimeout(() => {
+                const searchInput = this.directoryModal.querySelector("#dir-search-input");
+                if (searchInput) searchInput.focus();
+            }, 60);
             this.fetchDetails(true);
         }
 
@@ -520,6 +526,24 @@
                 // Close tooltip when clicking elsewhere
                 if (!evt.target.closest(".has-tooltip, #millenaire-tooltip")) {
                     this.hideTooltip();
+                }
+            });
+
+            // Global Escape key handling to close tooltip, directory, or side panel
+            document.addEventListener("keydown", (evt) => {
+                if (evt.key === "Escape") {
+                    if (this.tooltipEl && this.tooltipEl.classList.contains("visible")) {
+                        this.hideTooltip();
+                        return;
+                    }
+                    if (this.directoryModal && !this.directoryModal.classList.contains("hidden")) {
+                        this.closeDirectory();
+                        return;
+                    }
+                    if (this.container && !this.container.classList.contains("hidden")) {
+                        this.close();
+                        return;
+                    }
                 }
             });
 
@@ -683,24 +707,35 @@
                         return true;
                     }
                 }
-                return originalOnClick.call(this, event);
+                if (typeof originalOnClick === "function") {
+                    return originalOnClick.call(this, event);
+                }
+                return false;
             };
         }
 
         startAutoRefresh() {
-            if (this.pollTimer) clearInterval(this.pollTimer);
-            this.pollTimer = setInterval(() => {
+            if (this.pollTimer) clearTimeout(this.pollTimer);
+            const refreshCycle = async () => {
                 const isPanelOpen = !this.container.classList.contains("hidden");
                 const isDirOpen = !this.directoryModal.classList.contains("hidden");
                 if (isPanelOpen || isDirOpen) {
-                    this.fetchDetails(true);
+                    await this.fetchDetails(true);
                 }
-            }, 5000);
+                this.pollTimer = setTimeout(refreshCycle, 5000);
+            };
+            this.pollTimer = setTimeout(refreshCycle, 5000);
         }
 
         async fetchDetails(silent = false) {
+            if (this.isFetching) return this.detailsData;
+            this.isFetching = true;
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+
             try {
-                const res = await fetch("data/millenaire_details.json?t=" + Date.now());
+                const res = await fetch("data/millenaire_details.json?t=" + Date.now(), { signal: controller.signal });
+                clearTimeout(timeoutId);
                 if (!res.ok) return null;
                 this.detailsData = await res.json();
                 const villages = this.detailsData?.villages ?? [];
@@ -719,10 +754,13 @@
                 }
                 return this.detailsData;
             } catch (err) {
-                if (!silent) {
+                clearTimeout(timeoutId);
+                if (!silent && err.name !== "AbortError") {
                     console.error("Failed to load Millénaire details:", err);
                 }
                 return null;
+            } finally {
+                this.isFetching = false;
             }
         }
 
@@ -786,7 +824,7 @@
                                 <span class="dir-coords tabular-num">[${cx}, ${cy}, ${cz}]</span>
                             </div>
                         </div>
-                        <button class="dir-goto-btn" type="button" data-goto-id="${escapeHtml(v.id)}" title="Centrer et inspecter" aria-label="Centrer sur ${escapeHtml(v.name ?? 'ce village')}">📍</button>
+                        <span class="dir-goto-btn" aria-hidden="true" title="Centrer et inspecter">📍</span>
                     </div>
                 `;
             }).join("");
@@ -946,7 +984,7 @@
             const tsEl = this.container.querySelector("#panel-timestamp");
             if (tsEl && this.detailsData?.timestamp) {
                 const dateStr = new Date(this.detailsData.timestamp).toLocaleTimeString("fr-FR");
-                tsEl.textContent = `Mis à jour à ${dateStr} • Monde : ${escapeHtml(this.detailsData.world ?? "overworld")}`;
+                tsEl.textContent = `Mis à jour à ${dateStr} • Monde : ${this.detailsData.world ?? "overworld"}`;
             }
 
             // 1. POPULATION TAB
@@ -972,7 +1010,7 @@
                                 <span class="resident-sub">${escapeHtml(r.role ?? "Villageois")}${r.home_building ? ` • 🏠 ${escapeHtml(r.home_building)}` : ""}</span>
                             </div>
                             <div class="resident-badges">
-                                ${r.is_combatant ? `<span class="shield-badge tabular-num" title="Force militaire: ${r.military_strength ?? 0}">🛡️ ${r.military_strength ?? ""}</span>` : ""}
+                                ${r.is_combatant ? `<span class="shield-badge tabular-num" title="Force militaire: ${escapeHtml(String(r.military_strength ?? 0))}">🛡️ ${escapeHtml(String(r.military_strength ?? ""))}</span>` : ""}
                                 ${r.is_raiding ? '<span class="raid-badge">⚔️ Raid</span>' : ""}
                                 ${r.is_hired ? '<span class="hired-badge">🤝 Embauché</span>' : ""}
                                 ${r.is_killed ? '<span class="dead-badge">💀 Décédé</span>' : ""}
@@ -1097,8 +1135,8 @@
                 ? '<p class="muted-note">Aucune marchandise recensée dans les coffres.</p>'
                 : `
                     <div class="stock-chips">
-                        ${materialEntries.map(([k, val]) => `<span class="stock-chip">🧱 ${escapeHtml(k)}: <b class="tabular-num">${val}</b></span>`).join("")}
-                        ${foodEntries.map(([k, val]) => `<span class="stock-chip food">🍎 ${escapeHtml(k)}: <b class="tabular-num">${val}</b></span>`).join("")}
+                        ${materialEntries.map(([k, val]) => `<span class="stock-chip">🧱 ${escapeHtml(k)}: <b class="tabular-num">${escapeHtml(String(val))}</b></span>`).join("")}
+                        ${foodEntries.map(([k, val]) => `<span class="stock-chip food">🍎 ${escapeHtml(k)}: <b class="tabular-num">${escapeHtml(String(val))}</b></span>`).join("")}
                     </div>
                 `;
 
@@ -1110,7 +1148,7 @@
                             if (item.isGroup) {
                                 return `
                                     <li class="bld-clickable has-tooltip" data-bld-plan="${escapeHtml(item.bld.plan_id ?? '')}" data-bld-name="${escapeHtml(item.name)}" data-bx="${item.bld.x ?? 0}" data-by="${item.bld.y ?? 64}" data-bz="${item.bld.z ?? 0}" role="button" tabindex="0" title="Cliquer pour centrer la zone">
-                                        <span class="bld-name">🛡️ ${escapeHtml(item.name)} <span class="group-count tabular-num">×${item.count}</span></span>
+                                        <span class="bld-name">🛡️ ${escapeHtml(item.name)} <span class="group-count tabular-num">×${escapeHtml(String(item.count))}</span></span>
                                         <span class="bld-meta tabular-num">Fortifications • [${item.bld.x ?? 0}, ${item.bld.y ?? 0}, ${item.bld.z ?? 0}]</span>
                                     </li>
                                 `;

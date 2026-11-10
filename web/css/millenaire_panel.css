@@ -114,7 +114,7 @@
     border: 1px solid var(--mil-border-subtle);
     border-radius: var(--mil-radius-lg);
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7);
-    z-index: 10001;
+    z-index: 50;
     pointer-events: auto !important;
     display: flex;
     flex-direction: column;
@@ -310,7 +310,7 @@
     border: 1px solid var(--mil-border-subtle);
     border-radius: var(--mil-radius-xl);
     box-shadow: 0 14px 42px rgba(0, 0, 0, 0.75);
-    z-index: 10001;
+    z-index: 50;
     pointer-events: auto !important;
     display: flex;
     flex-direction: column;
@@ -352,8 +352,9 @@
     color: var(--mil-text-main) !important;
 }
 
-.close-btn,
-.icon-btn {
+#millenaire-side-panel .close-btn,
+#millenaire-side-panel .icon-btn,
+#millenaire-directory-panel .close-btn {
     background: transparent;
     border: none;
     color: var(--mil-text-muted);
@@ -364,13 +365,14 @@
     transition: background 0.15s ease, color 0.15s ease;
 }
 
-.close-btn:hover,
-.icon-btn:hover {
+#millenaire-side-panel .close-btn:hover,
+#millenaire-side-panel .icon-btn:hover,
+#millenaire-directory-panel .close-btn:hover {
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
 }
 
-.sub-row {
+#millenaire-side-panel .sub-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -379,7 +381,7 @@
     font-size: 0.82rem;
 }
 
-.badge {
+#millenaire-side-panel .badge {
     padding: 2px 8px;
     border-radius: 4px;
     font-weight: 600;
@@ -387,7 +389,7 @@
     color: #fff;
 }
 
-.type-pill {
+#millenaire-side-panel .type-pill {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 3px 8px;
@@ -400,30 +402,30 @@
     gap: 4px;
 }
 
-.type-pill.has-tooltip {
+#millenaire-side-panel .type-pill.has-tooltip {
     cursor: pointer;
     border-bottom: 1px dashed rgba(255, 255, 255, 0.35);
     transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.type-pill.has-tooltip:hover {
+#millenaire-side-panel .type-pill.has-tooltip:hover {
     background: rgba(255, 255, 255, 0.14);
     border-color: var(--mil-accent-blue);
 }
 
-.type-pill .tip-icon {
+#millenaire-side-panel .type-pill .tip-icon {
     font-size: 0.72rem;
     opacity: 0.7;
     margin-left: 2px;
 }
 
-.coords {
+#millenaire-side-panel .coords {
     color: var(--mil-text-dim);
     font-family: monospace;
     font-size: 0.78rem;
 }
 
-.focus-btn {
+#millenaire-side-panel .focus-btn {
     margin-left: auto;
     background: rgba(52, 152, 219, 0.2);
     border: 1px solid rgba(52, 152, 219, 0.45);
@@ -436,11 +438,11 @@
     transition: background 0.15s ease;
 }
 
-.focus-btn:hover {
+#millenaire-side-panel .focus-btn:hover {
     background: var(--mil-accent-blue);
 }
 
-.quick-stats-bar {
+#millenaire-side-panel .quick-stats-bar {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -630,18 +632,18 @@
 }
 
 /* Stat Grid Cards */
-.stat-grid {
+#millenaire-side-panel .stat-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     margin-bottom: 12px;
 }
 
-.stat-grid-3 {
+#millenaire-side-panel .stat-grid-3 {
     grid-template-columns: repeat(3, 1fr);
 }
 
-.stat-card {
+#millenaire-side-panel .stat-card {
     background: var(--mil-surface-card);
     border: 1px solid var(--mil-border-subtle);
     border-radius: var(--mil-radius-md);
@@ -651,12 +653,12 @@
     gap: 2px;
 }
 
-.stat-card span {
+#millenaire-side-panel .stat-card span {
     font-size: 0.74rem;
     color: var(--mil-text-muted);
 }
 
-.stat-card b {
+#millenaire-side-panel .stat-card b {
     font-size: 1.15rem;
     color: #fff;
 }
@@ -813,14 +815,14 @@
     color: var(--mil-text-muted);
 }
 
-.progress-bar {
+#millenaire-side-panel .progress-bar {
     height: 6px;
     background: rgba(255, 255, 255, 0.08);
     border-radius: 3px;
     overflow: hidden;
 }
 
-.progress-bar .fill {
+#millenaire-side-panel .progress-bar .fill {
     height: 100%;
     background: var(--mil-accent-green);
     border-radius: 3px;
@@ -1186,7 +1188,7 @@
 /* 8. Contextual Interactive Tooltip */
 #millenaire-tooltip {
     position: fixed;
-    z-index: 10005;
+    z-index: 60;
     pointer-events: none;
     width: 310px;
     max-width: calc(100vw - 24px);

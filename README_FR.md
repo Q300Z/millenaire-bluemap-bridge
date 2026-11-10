@@ -26,6 +26,7 @@ En reliant le moteur de simulation de Millénaire au pipeline de rendu WebGL de 
 - [Guide d'Installation Pas-à-Pas](#guide-dinstallation-pas-à-pas)
   - [Étape 1 : Installation du Mod (.jar)](#étape-1--installation-du-mod-jar)
   - [Étape 2 : Intégration de l'Interface Web BlueMap](#étape-2--intégration-de-linterface-web-bluemap)
+- [Foire Aux Questions & Dépannage (FAQ)](#foire-aux-questions--dépannage-faq)
 - [Structure du Dépôt](#structure-du-dépôt)
 - [Crédits & Attributions](#crédits--attributions)
 - [Licence](#licence)
@@ -152,18 +153,37 @@ L'installation se décompose de manière claire en deux phases distinctes : (1) 
 
 Afin d'offrir une flexibilité maximale aux administrateurs et d'éviter tout écrasement des personnalisations existantes, le pont propose des fichiers web modulaires (`web/js/millenaire_panel.js` et `web/css/millenaire_panel.css`) accompagnés d'un extrait de configuration non destructif.
 
-#### 1. Copier les Fichiers Frontend
+> [!TIP]
+> **Téléchargement direct pré-empaqueté :** Vous pouvez télécharger l'archive prête à l'emploi `millenaire-bluemap-web-assets-<version>.zip` depuis la page des [Releases GitHub](https://github.com/Q300Z/millenaire-bluemap-bridge/releases) et décompresser son contenu directement dans votre dossier `bluemap/web/`.
+
+#### 1. Emplacement des Fichiers Frontend
 Copiez les fichiers web du mod dans le répertoire de publication de BlueMap :
-- Copier `web/js/millenaire_panel.js` → `<racine_serveur>/bluemap/web/js/millenaire_panel.js`
-- Copier `web/css/millenaire_panel.css` → `<racine_serveur>/bluemap/web/css/millenaire_panel.css`
+- Copier `web/js/millenaire_panel.js` → `<racine_instance>/bluemap/web/js/millenaire_panel.js`
+- Copier `web/css/millenaire_panel.css` → `<racine_instance>/bluemap/web/css/millenaire_panel.css`
+
+> [!NOTE]
+> **Qu'est-ce que `<racine_instance>` ?**
+> - **Sur un serveur dédié :** C'est le dossier principal contenant `server.jar`.
+> - **En partie solo (Modrinth / Prism / CurseForge / Launcher officiel) :** C'est le répertoire de votre profil ou instance (accessible via « Ouvrir le dossier » dans votre launcher, ou `.minecraft`).
 
 #### 2. Configurer BlueMap (`webapp.conf`)
-Ouvrez le fichier de configuration existant de votre serveur situé à l'emplacement `<racine_serveur>/config/bluemap/webapp.conf`.
+Ouvrez le fichier de configuration existant situé à l'emplacement `<racine_instance>/config/bluemap/webapp.conf`.
 
-Localisez les listes `scripts` et `styles`, puis ajoutez les références aux fichiers du panneau Millénaire :
+Dans la configuration BlueMap par défaut, les listes `scripts` et `styles` sont souvent commentées avec un `#`. Décommentez-les (retirez le `#`) et ajoutez les chemins relatifs comme ci-dessous :
 
+##### Avant (Configuration BlueMap d'origine) :
 ```hocon
-# Ajoutez les scripts et styles de Millénaire BlueMap Bridge dans votre webapp.conf existant :
+#scripts: [
+#    "js/custom.js"
+#]
+
+#styles: [
+#    "css/custom.css"
+#]
+```
+
+##### Après (Avec intégration Millénaire Bridge) :
+```hocon
 scripts: [
     "js/millenaire_panel.js"
 ]
@@ -173,8 +193,44 @@ styles: [
 ]
 ```
 
-#### 3. Accéder à la Carte
+#### 3. Accéder à la Carte & Vider le Cache
 Ouvrez votre navigateur web et accédez à l'URL de votre carte BlueMap (par défaut : `http://localhost:8100` ou l'adresse de votre serveur). Le bouton `🏰 Villages` sera immédiatement visible dans la barre supérieure !
+
+> [!IMPORTANT]
+> **Pensez à forcer le rechargement de la page (`Ctrl + F5` ou `Cmd + Shift + R`) !**  
+> Les navigateurs modernes mettent en cache agressif les assets Web de BlueMap. Un rafraîchissement forcé garantit le chargement immédiat des nouveaux scripts et styles.
+
+---
+
+## Foire Aux Questions & Dépannage (FAQ)
+
+<details>
+<summary><b>1. Le bouton « 🏰 Villages » n'apparaît pas sur ma carte BlueMap. Que faire ?</b></summary>
+<br>
+
+- Assurez-vous que les lignes `scripts: [...]` et `styles: [...]` dans `config/bluemap/webapp.conf` ne comportent plus de dièse `#` en début de ligne.
+- Vérifiez que les fichiers sont bien présents dans `bluemap/web/js/millenaire_panel.js` et `bluemap/web/css/millenaire_panel.css`.
+- Effectuez un rafraîchissement forcé dans votre navigateur avec `Ctrl + F5` (ou `Cmd + Shift + R` sous macOS).
+- Ouvrez la console développeur de votre navigateur (`F12` > Console) pour vérifier qu'aucune erreur réseau 404 ne bloque le chargement.
+</details>
+
+<details>
+<summary><b>2. Les zones 3D ou les arches diplomatiques ne s'affichent pas dans le monde.</b></summary>
+<br>
+
+- Ouvrez le menu des calques de BlueMap (icône de superposition de couches en haut à gauche ou à droite de l'interface BlueMap).
+- Vérifiez que les calques **« Villages Millénaire »**, **« Territoires des Villages »** et **« Relations Diplomatiques »** sont bien cochés.
+- Si un village vient d'être généré, patientez quelques secondes : le pont met à jour les données en mémoire toutes les 5 secondes.
+</details>
+
+<details>
+<summary><b>3. Le mod fonctionne-t-il en solo ou nécessite-t-il un serveur dédié ?</b></summary>
+<br>
+
+Le mod fonctionne parfaitement dans les deux configurations :
+- **En solo :** BlueMap héberge un serveur web interne local accessible sur `http://localhost:8100`.
+- **Sur serveur dédié :** Le mod extrait les données sans aucun impact sur le tick rate (zéro TPS drop) et sert les données aux joueurs connectés à l'adresse de la carte en ligne du serveur.
+</details>
 
 ---
 

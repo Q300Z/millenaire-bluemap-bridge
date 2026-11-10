@@ -41,6 +41,7 @@ jobs:
           release_branches: main
 
       - name: Mise à jour automatique de update.json (NeoForge Update Checker)
+        if: steps.tag_version.outputs.new_tag != ''
         run: |
           VERSION="${{ steps.tag_version.outputs.new_version }}"
           echo "Mise à jour de update.json vers la version ${VERSION}..."
@@ -71,6 +72,7 @@ jobs:
           git push origin main || echo "Push skipped or branch already up to date"
 
       - name: Préparation et empaquetage des artefacts de release
+        if: steps.tag_version.outputs.new_tag != ''
         run: |
           mkdir -p dist
           VERSION="${{ steps.tag_version.outputs.new_version }}"
@@ -93,10 +95,16 @@ jobs:
             cp "libs/millenaire-bluemap-bridge-1.0.0.jar" "dist/millenaire-bluemap-bridge-${VERSION}.jar"
           fi
           
+          if [ ! -f "dist/millenaire-bluemap-bridge-${VERSION}.jar" ]; then
+            echo "::error::Échec critique : Aucun fichier JAR du mod trouvé pour la release !"
+            exit 1
+          fi
+          
           echo "Artefacts prêts pour la release :"
           ls -la dist/
 
       - name: Publication de la GitHub Release
+        if: steps.tag_version.outputs.new_tag != ''
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag_version.outputs.new_tag }}

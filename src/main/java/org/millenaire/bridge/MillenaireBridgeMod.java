@@ -7,6 +7,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.apache.logging.log4j.LogManager;
@@ -55,8 +56,16 @@ public class MillenaireBridgeMod {
     }
 
     @SubscribeEvent
+    public void onServerStopping(ServerStoppingEvent event) {
+        LOGGER.info("Server stopping: shutting down Millénaire BlueMap tasks.");
+        isExporting.set(true); // Prevent new sync cycles while shutting down
+        this.blueMapService.resetState();
+    }
+
+    @SubscribeEvent
     public void onServerStopped(ServerStoppedEvent event) {
         this.lastChunkFlushMs = 0L;
+        isExporting.set(false);
         this.blueMapService.resetState();
     }
 
@@ -85,14 +94,6 @@ public class MillenaireBridgeMod {
 
             // Detect if a new village was generated or if a building finished construction or upgraded
             Set<Vector2i> changedRegions = blueMapService.detectChangedRegions(snapshots);
-            if (!changedRegions.isEmpty()) {
-                long now = System.currentTimeMillis();
-                if (now - lastChunkFlushMs >= CHUNK_FLUSH_COOLDOWN_MS) {
-                    // Flush modified chunks to saves/<World>/region/r.X.Z.mca so BlueMap reads the new blocks
-                    overworld.getChunkSource().save(false);
-                    lastChunkFlushMs = now;
-                }
-            }
 
             // Offload geometry, JSON IO, and BlueMap RenderManager scheduling to worker thread
             CompletableFuture.runAsync(() -> {

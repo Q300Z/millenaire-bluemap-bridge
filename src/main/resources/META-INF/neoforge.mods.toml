@@ -35,6 +35,6 @@ description='''Real-time 3D territorial zones, diplomatic networks, and interact
 [[dependencies.millenaire_bluemap]]
     modId="bluemap"
     type="required"
-    versionRange="[5.29,)"
+    versionRange="[5.11,)"
     ordering="AFTER"
     side="BOTH"

@@ -31,6 +31,15 @@ import java.util.*;
 
 public class VillageDataExtractor {
 
+    private static final byte CAT_OTHER = 0;
+    private static final byte CAT_WOOD = 1;
+    private static final byte CAT_STONE = 2;
+    private static final byte CAT_FOOD = 3;
+    private static final byte CAT_CURRENCY_GOLD = 4;
+    private static final byte CAT_CURRENCY_SILVER = 5;
+    private static final byte CAT_CURRENCY_COPPER = 6;
+    private final Map<Item, Byte> itemCategoryCache = new java.util.concurrent.ConcurrentHashMap<>();
+
     public List<VillageSnapshotDTO> extractSnapshots(ServerLevel overworld) {
         if (overworld == null) {
             return Collections.emptyList();
@@ -376,30 +385,46 @@ public class VillageDataExtractor {
             int count = entry.getValue();
             if (item == null || count <= 0) continue;
 
-            Identifier id = BuiltInRegistries.ITEM.getKey(item);
-            String idStr = id != null ? id.toString() : "";
-            String path = id != null ? id.getPath().toLowerCase(Locale.ROOT) : "";
-            String label = MillenaireTranslationHelper.translateItem(item.getDescriptionId(), idStr);
+            byte cat = itemCategoryCache.computeIfAbsent(item, this::computeCategory);
+            if (cat == CAT_OTHER) continue;
 
-            if (path.equals("denier_or")) {
+            if (cat == CAT_CURRENCY_GOLD) {
                 gold += count;
-            } else if (path.equals("denier_argent")) {
+            } else if (cat == CAT_CURRENCY_SILVER) {
                 silver += count;
-            } else if (path.equals("denier")) {
+            } else if (cat == CAT_CURRENCY_COPPER) {
                 copper += count;
-            } else if (isFoodItem(item, path)) {
-                totalFood += count;
-                foods.merge(label, count, Integer::sum);
-            } else if (isWoodItem(path)) {
-                totalWood += count;
-                materials.merge(label, count, Integer::sum);
-            } else if (isStoneOrMaterialItem(path)) {
-                totalStone += count;
-                materials.merge(label, count, Integer::sum);
+            } else {
+                Identifier id = BuiltInRegistries.ITEM.getKey(item);
+                String idStr = id != null ? id.toString() : "";
+                String label = MillenaireTranslationHelper.translateItem(item.getDescriptionId(), idStr);
+                if (cat == CAT_FOOD) {
+                    totalFood += count;
+                    foods.merge(label, count, Integer::sum);
+                } else if (cat == CAT_WOOD) {
+                    totalWood += count;
+                    materials.merge(label, count, Integer::sum);
+                } else if (cat == CAT_STONE) {
+                    totalStone += count;
+                    materials.merge(label, count, Integer::sum);
+                }
             }
         }
 
         return new StockpileDTO(gold, silver, copper, totalWood, totalStone, totalFood, materials, foods);
+    }
+
+    private byte computeCategory(Item item) {
+        if (item == null) return CAT_OTHER;
+        Identifier id = BuiltInRegistries.ITEM.getKey(item);
+        String path = id != null ? id.getPath().toLowerCase(Locale.ROOT) : "";
+        if (path.equals("denier_or")) return CAT_CURRENCY_GOLD;
+        if (path.equals("denier_argent")) return CAT_CURRENCY_SILVER;
+        if (path.equals("denier")) return CAT_CURRENCY_COPPER;
+        if (isFoodItem(item, path)) return CAT_FOOD;
+        if (isWoodItem(path)) return CAT_WOOD;
+        if (isStoneOrMaterialItem(path)) return CAT_STONE;
+        return CAT_OTHER;
     }
 
     private boolean isWoodItem(String path) {

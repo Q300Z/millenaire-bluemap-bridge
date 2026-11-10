@@ -26,6 +26,7 @@ By bridging Millénaire's rich simulation engine with BlueMap's WebGL rendering 
 - [Step-by-Step Installation Guide](#step-by-step-installation-guide)
   - [Part 1: Mod Installation (Server / Client)](#part-1-mod-installation-server--client)
   - [Part 2: BlueMap Web Frontend Setup](#part-2-bluemap-web-frontend-setup)
+- [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
 - [Repository Structure](#repository-structure)
 - [Credits & Attributions](#credits--attributions)
 - [License](#license)
@@ -152,18 +153,37 @@ The installation is cleanly split into two distinct steps: (1) installing the mo
 
 To provide administrators with maximum flexibility and avoid overwriting existing web customization, the bridge delivers modular web assets (`web/js/millenaire_panel.js` and `web/css/millenaire_panel.css`) accompanied by a non-destructive configuration snippet.
 
+> [!TIP]
+> **Pre-packaged Asset Download:** You can download the ready-to-use archive `millenaire-bluemap-web-assets-<version>.zip` directly from the [GitHub Releases](https://github.com/Q300Z/millenaire-bluemap-bridge/releases) page and extract its contents straight into your `bluemap/web/` directory.
+
 #### 1. Copy Frontend Assets
 Copy the mod's web files into your BlueMap web deployment folder:
-- Copy `web/js/millenaire_panel.js` → `<server_root>/bluemap/web/js/millenaire_panel.js`
-- Copy `web/css/millenaire_panel.css` → `<server_root>/bluemap/web/css/millenaire_panel.css`
+- Copy `web/js/millenaire_panel.js` → `<instance_root>/bluemap/web/js/millenaire_panel.js`
+- Copy `web/css/millenaire_panel.css` → `<instance_root>/bluemap/web/css/millenaire_panel.css`
+
+> [!NOTE]
+> **What is `<instance_root>`?**
+> - **On a Dedicated Server:** It is the base folder containing `server.jar`.
+> - **In Singleplayer (Modrinth / Prism / CurseForge / Official Launcher):** It is your profile or instance directory (accessible via "Open Folder" in your launcher, or `.minecraft`).
 
 #### 2. Configure BlueMap (`webapp.conf`)
-Open your server's existing BlueMap configuration file located at `<server_root>/config/bluemap/webapp.conf`.
+Open your server's existing BlueMap configuration file located at `<instance_root>/config/bluemap/webapp.conf`.
 
-Locate the `scripts` and `styles` arrays, and append the Millénaire panel files:
+In the default BlueMap configuration, the `scripts` and `styles` lists are often commented out with a `#`. Uncomment them (remove the `#`) and set the paths as shown below:
 
+##### Before (Default BlueMap configuration):
 ```hocon
-# Add Millénaire BlueMap Bridge scripts and styles to your existing webapp.conf:
+#scripts: [
+#    "js/custom.js"
+#]
+
+#styles: [
+#    "css/custom.css"
+#]
+```
+
+##### After (With Millénaire Bridge enabled):
+```hocon
 scripts: [
     "js/millenaire_panel.js"
 ]
@@ -173,8 +193,44 @@ styles: [
 ]
 ```
 
-#### 3. Access Your Map
-Open your web browser and navigate to your BlueMap web address (e.g., `http://localhost:8100` or your server's domain). The `🏰 Villages` launcher button will appear in the top control bar!
+#### 3. Access Your Map & Clear Cache
+Open your web browser and navigate to your BlueMap web address (e.g., `http://localhost:8100` or your server's domain). The `🏰 Villages` launcher button will appear immediately in the top control bar!
+
+> [!IMPORTANT]
+> **Remember to force refresh your browser (`Ctrl + F5` or `Cmd + Shift + R`)!**  
+> Modern browsers aggressively cache BlueMap's web assets. A hard refresh ensures the latest JavaScript logic and styles are loaded cleanly without stale cache conflicts.
+
+---
+
+## Frequently Asked Questions (FAQ)
+
+<details>
+<summary><b>1. The "🏰 Villages" button does not show up in the BlueMap top bar. What should I check?</b></summary>
+<br>
+
+- Ensure that `scripts: [...]` and `styles: [...]` in `config/bluemap/webapp.conf` no longer have leading `#` comment characters.
+- Verify that both files are present on disk at `bluemap/web/js/millenaire_panel.js` and `bluemap/web/css/millenaire_panel.css`.
+- Perform a hard refresh in your browser using `Ctrl + F5` (or `Cmd + Shift + R` on macOS).
+- Open browser developer tools (`F12` > Console) to ensure no 404 network errors or script collisions are occurring.
+</details>
+
+<details>
+<summary><b>2. The 3D village territorial zones or diplomatic arcs are not visible.</b></summary>
+<br>
+
+- Open the BlueMap layers menu (the stacked layers icon in the top corner of the BlueMap interface).
+- Make sure that **"Millénaire Villages"**, **"Village Territories"**, and **"Diplomatic Relations"** layer sets are checked.
+- If a village was just generated, give it a few seconds: the mod updates in-memory telemetry and marker caches every 5 seconds.
+</details>
+
+<details>
+<summary><b>3. Does this mod require a dedicated server, or does it work in Singleplayer?</b></summary>
+<br>
+
+It works seamlessly in both:
+- **In Singleplayer:** BlueMap hosts an internal embedded web server at `http://localhost:8100`.
+- **On Dedicated Servers:** The bridge extracts data with negligible overhead (zero TPS impact) and serves live telemetry to web visitors at the server's public map domain.
+</details>
 
 ---
 
