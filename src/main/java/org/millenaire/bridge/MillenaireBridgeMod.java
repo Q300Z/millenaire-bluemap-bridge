@@ -16,6 +16,7 @@ import org.millenaire.bridge.bluemap.BlueMapIntegrationService;
 import org.millenaire.bridge.dto.VillageSnapshotDTO;
 import org.millenaire.bridge.exporter.AtomicJsonExporter;
 import org.millenaire.bridge.extractor.VillageDataExtractor;
+import org.millenaire.bridge.installer.WebAssetAutoInstaller;
 
 import java.util.List;
 import java.util.Set;
@@ -47,11 +48,15 @@ public class MillenaireBridgeMod {
         );
         this.blueMapService.register();
         NeoForge.EVENT_BUS.register(this);
+        
+        // Auto-install and sync BlueMap web assets directly from this mod JAR
+        WebAssetAutoInstaller.install();
         LOGGER.info("Millénaire BlueMap Integration Bridge v1.0.0 initialized.");
     }
 
     @SubscribeEvent
     public void onServerStarted(ServerStartedEvent event) {
+        WebAssetAutoInstaller.install();
         triggerSync(event.getServer());
     }
 

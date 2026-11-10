@@ -23,9 +23,10 @@ By bridging Millénaire's rich simulation engine with BlueMap's WebGL rendering 
   - [Interactive Web Interface & Directory Drawer](#3-interactive-web-interface--directory-drawer)
 - [Visual Media Showcase](#visual-media-showcase)
 - [Technical Specifications & Compatibility](#technical-specifications--compatibility)
-- [Step-by-Step Installation Guide](#step-by-step-installation-guide)
-  - [Part 1: Mod Installation (Server / Client)](#part-1-mod-installation-server--client)
-  - [Part 2: BlueMap Web Frontend Setup](#part-2-bluemap-web-frontend-setup)
+- [Installation Guide (100% Automated)](#installation-guide-100-automated)
+  - [1-Click Drop-in Installation (Recommended)](#1-click-drop-in-installation-recommended)
+  - [Standalone Command-Line Execution (Optional)](#standalone-command-line-execution-optional)
+  - [Manual Advanced Setup (Optional)](#manual-advanced-setup-optional)
 - [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
 - [Repository Structure](#repository-structure)
 - [Credits & Attributions](#credits--attributions)
@@ -128,77 +129,48 @@ The included frontend extension (`web/js/millenaire_panel.js` & `web/css/millena
 
 ---
 
-## Step-by-Step Installation Guide
+## Installation Guide (100% Automated)
 
-The installation is cleanly split into two distinct steps: (1) installing the mod JAR in your Minecraft instance, and (2) enabling the web frontend assets in your BlueMap configuration.
+Thanks to the integrated standalone installer (**Zero-Config Drop-in**), **a single `.jar` file installs and configures everything automatically** without requiring manual file manipulation!
 
-### Part 1: Mod Installation (Server / Client)
+### 1-Click Drop-in Installation (Recommended)
 
-1. Verify that your server or singleplayer client runs **Minecraft 26.3** with **NeoForge 26.3.0+**.
-2. Place the required core mods in your instance's `mods/` directory:
-   - `millenaire-9.1.0+mc26.3.jar` (or later)
-   - `bluemap-5.29-neoforge.jar` (or 5.11+)
-3. Download `millenaire-bluemap-bridge-1.0.0.jar` from the [Releases](https://github.com/Q300Z/millenaire-bluemap-bridge/releases) page and copy it into the `mods/` directory.
-   - Alternatively, clone and compile from source:
-     ```bash
-     git clone git@github.com:Q300Z/millenaire-bluemap-bridge.git
-     cd millenaire-bluemap-bridge
-     ./build.sh
-     ```
-4. Start your server once to initialize the bridge. The mod will automatically register custom BlueMap marker sets and prepare the telemetry export pipeline.
+1. Ensure your server or singleplayer instance has **Minecraft 26.3**, **NeoForge 26.3.0+**, **Millénaire 9.1.0+**, and **BlueMap 5.11+ / 5.29**.
+2. Download `millenaire-bluemap-bridge-1.0.0.jar` from the [Releases](https://github.com/Q300Z/millenaire-bluemap-bridge/releases) page and drop it into your instance's `mods/` directory.
+3. **Simply start Minecraft!**
+   - The mod automatically extracts web assets (`millenaire_panel.js` and `millenaire_panel.css`) into your `bluemap/web/` directory.
+   - The mod automatically patches and enables scripts and styles in `config/bluemap/webapp.conf`.
+4. Open your browser to your BlueMap map URL (`http://localhost:8100`) and perform a hard refresh (`Ctrl + F5` or `Cmd + Shift + R`).  
+   **The `🏰 Villages` button is immediately active and ready!**
 
 ---
 
-### Part 2: BlueMap Web Frontend Setup
+### Standalone Command-Line Execution (Optional)
 
-To provide administrators with maximum flexibility and avoid overwriting existing web customization, the bridge delivers modular web assets (`web/js/millenaire_panel.js` and `web/css/millenaire_panel.css`) accompanied by a non-destructive configuration snippet.
+If you are provisioning a headless dedicated server, container (Docker), or CI/CD pipeline and want to pre-install web assets and configure `webapp.conf` before launching Minecraft:
 
-> [!TIP]
-> **Pre-packaged Asset Download:** You can download the ready-to-use archive `millenaire-bluemap-web-assets-<version>.zip` directly from the [GitHub Releases](https://github.com/Q300Z/millenaire-bluemap-bridge/releases) page and extract its contents straight into your `bluemap/web/` directory.
-
-#### 1. Copy Frontend Assets
-Copy the mod's web files into your BlueMap web deployment folder:
-- Copy `web/js/millenaire_panel.js` → `<instance_root>/bluemap/web/js/millenaire_panel.js`
-- Copy `web/css/millenaire_panel.css` → `<instance_root>/bluemap/web/css/millenaire_panel.css`
-
-> [!NOTE]
-> **What is `<instance_root>`?**
-> - **On a Dedicated Server:** It is the base folder containing `server.jar`.
-> - **In Singleplayer (Modrinth / Prism / CurseForge / Official Launcher):** It is your profile or instance directory (accessible via "Open Folder" in your launcher, or `.minecraft`).
-
-#### 2. Configure BlueMap (`webapp.conf`)
-Open your server's existing BlueMap configuration file located at `<instance_root>/config/bluemap/webapp.conf`.
-
-In the default BlueMap configuration, the `scripts` and `styles` lists are often commented out with a `#`. Uncomment them (remove the `#`) and set the paths as shown below:
-
-##### Before (Default BlueMap configuration):
-```hocon
-#scripts: [
-#    "js/custom.js"
-#]
-
-#styles: [
-#    "css/custom.css"
-#]
+```bash
+# Direct standalone execution (zero external dependencies required):
+java -jar mods/millenaire-bluemap-bridge-1.0.0.jar
 ```
 
-##### After (With Millénaire Bridge enabled):
-```hocon
-scripts: [
-    "js/millenaire_panel.js"
-]
+---
 
-styles: [
-    "css/millenaire_panel.css"
-]
-```
+### Manual Advanced Setup (Optional)
 
-#### 3. Access Your Map & Clear Cache
-Open your web browser and navigate to your BlueMap web address (e.g., `http://localhost:8100` or your server's domain). The `🏰 Villages` launcher button will appear immediately in the top control bar!
+If your environment uses a custom external web server (Nginx/Apache or static reverse proxy):
 
-> [!IMPORTANT]
-> **Remember to force refresh your browser (`Ctrl + F5` or `Cmd + Shift + R`)!**  
-> Modern browsers aggressively cache BlueMap's web assets. A hard refresh ensures the latest JavaScript logic and styles are loaded cleanly without stale cache conflicts.
+1. Web asset sources are available in the repository `web/` folder or via the `millenaire-bluemap-web-assets-<version>.zip` release bundle.
+2. Copy `millenaire_panel.js` to `<webroot>/js/` and `millenaire_panel.css` to `<webroot>/css/`.
+3. Reference them in `config/bluemap/webapp.conf`:
+   ```hocon
+   scripts: [
+       "js/millenaire_panel.js"
+   ]
+   styles: [
+       "css/millenaire_panel.css"
+   ]
+   ```
 
 ---
 

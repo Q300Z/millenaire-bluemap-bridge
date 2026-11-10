@@ -25,5 +25,14 @@ CP="mods/millenaire-9.1.0+mc26.3.jar:mods/bluemap-5.29-neoforge.jar:millenaire-b
   $(find millenaire-bluemap-bridge/src/main/java -name "*.java")
 
 cp -r millenaire-bluemap-bridge/src/main/resources/* millenaire-bluemap-bridge/build/classes/
-"$JAR_BIN" cf mods/millenaire-bluemap-bridge-1.0.0.jar -C millenaire-bluemap-bridge/build/classes .
+cat << 'EOF' > millenaire-bluemap-bridge/build/classes/META-INF/MANIFEST.MF
+Manifest-Version: 1.0
+Main-Class: org.millenaire.bridge.installer.WebAssetAutoInstaller
+Implementation-Title: Millenaire BlueMap Bridge
+Implementation-Version: 1.0.0
+Implementation-Vendor: Q300Z
+EOF
+
+"$JAR_BIN" cfm mods/millenaire-bluemap-bridge-1.0.0.jar millenaire-bluemap-bridge/build/classes/META-INF/MANIFEST.MF -C millenaire-bluemap-bridge/build/classes .
+cp mods/millenaire-bluemap-bridge-1.0.0.jar millenaire-bluemap-bridge/libs/millenaire-bluemap-bridge-1.0.0.jar
 echo "Built mods/millenaire-bluemap-bridge-1.0.0.jar successfully."
