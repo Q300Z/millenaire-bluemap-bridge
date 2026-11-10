@@ -1,10 +1,11 @@
 {
   "homepage": "https://github.com/Q300Z/millenaire-bluemap-bridge",
   "promos": {
-    "26.3-latest": "1.0.0",
-    "26.3-recommended": "1.0.0"
+    "26.3-latest": "0.0.1",
+    "26.3-recommended": "0.0.1"
   },
   "26.3": {
-    "1.0.0": "Publication initiale du mod bridge Millénaire 9.1.0 et BlueMap 5.29 pour Minecraft 26.3."
+    "1.0.0": "Publication initiale du mod bridge Millénaire 9.1.0 et BlueMap 5.29 pour Minecraft 26.3.",
+    "0.0.1": "Mise à jour vers la version 0.0.1 pour Minecraft 26.3."
   }
 }
