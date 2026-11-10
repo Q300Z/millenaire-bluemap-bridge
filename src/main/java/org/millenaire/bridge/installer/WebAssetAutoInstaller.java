@@ -7,14 +7,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
+import java.security.MessageDigest;
+import java.util.HexFormat;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Automates the extraction of BlueMap web assets (JS/CSS) from the mod JAR
  * directly into BlueMap's webroot, and automatically configures config/bluemap/webapp.conf.
- * This eliminates the need for manual file copying or configuration editing.
+ *
+ * Verifies the integrity and version of installed assets using SHA-256 checksums.
+ * If files are missing, corrupted, or outdated, they are automatically restored
+ * or upgraded to the exact version bundled in the mod JAR.
  *
  * Runs automatically when Minecraft starts, and can also be run standalone via `java -jar`.
  * Zero external dependencies.
@@ -34,9 +38,9 @@ public final class WebAssetAutoInstaller {
     private WebAssetAutoInstaller() {}
 
     public static void main(String[] args) {
-        System.out.println(PREFIX + "Starting standalone installation...");
+        System.out.println(PREFIX + "Starting standalone installation & checksum verification...");
         install();
-        System.out.println(PREFIX + "Installation completed.");
+        System.out.println(PREFIX + "Installation & verification completed.");
     }
 
     private static void logInfo(String message) {
@@ -56,7 +60,7 @@ public final class WebAssetAutoInstaller {
 
     public static void install() {
         try {
-            logInfo("Checking automatic installation of Millénaire BlueMap web assets...");
+            logInfo("Checking automatic installation & SHA-256 checksums of Millénaire BlueMap web assets...");
 
             Path configDir = Paths.get("config", "bluemap");
             Path webappConfPath = configDir.resolve("webapp.conf");
@@ -77,14 +81,14 @@ public final class WebAssetAutoInstaller {
 
             Path webrootDir = Paths.get(webrootStr);
 
-            // 2. Extract embedded JS & CSS files into webroot
-            boolean jsCopied = copyResourceIfChanged(JS_RESOURCE, webrootDir.resolve(JS_TARGET_NAME));
-            boolean cssCopied = copyResourceIfChanged(CSS_RESOURCE, webrootDir.resolve(CSS_TARGET_NAME));
+            // 2. Extract and verify embedded JS & CSS files into webroot via SHA-256 checksums
+            boolean jsUpdated = verifyAndSyncResource(JS_RESOURCE, webrootDir.resolve(JS_TARGET_NAME));
+            boolean cssUpdated = verifyAndSyncResource(CSS_RESOURCE, webrootDir.resolve(CSS_TARGET_NAME));
 
-            if (jsCopied || cssCopied) {
-                logInfo("Millénaire BlueMap web assets deployed successfully to '" + webrootDir + "'");
+            if (jsUpdated || cssUpdated) {
+                logInfo("Millénaire BlueMap web assets successfully updated and verified in '" + webrootDir + "'");
             } else {
-                logInfo("Millénaire BlueMap web assets in '" + webrootDir + "' are already up-to-date.");
+                logInfo("All Millénaire BlueMap web assets in '" + webrootDir + "' match expected SHA-256 checksums.");
             }
 
             // 3. Automatically patch webapp.conf to include JS and CSS if needed
@@ -95,7 +99,13 @@ public final class WebAssetAutoInstaller {
         }
     }
 
-    private static boolean copyResourceIfChanged(String resourcePath, Path destinationPath) {
+    /**
+     * Verifies the target file on disk against the expected SHA-256 checksum of the embedded resource.
+     * Updates or creates the file if the checksum differs or if the file is missing.
+     *
+     * @return true if the file was written or updated, false if it was already valid.
+     */
+    private static boolean verifyAndSyncResource(String resourcePath, Path destinationPath) {
         try (InputStream in = WebAssetAutoInstaller.class.getResourceAsStream(resourcePath)) {
             if (in == null) {
                 logWarn("Embedded resource not found in mod JAR: " + resourcePath);
@@ -108,14 +118,22 @@ public final class WebAssetAutoInstaller {
             while ((read = in.read(buffer)) != -1) {
                 baos.write(buffer, 0, read);
             }
-            byte[] resourceBytes = baos.toByteArray();
+            byte[] bundledBytes = baos.toByteArray();
+            String bundledChecksum = computeSha256(bundledBytes);
+            String fileName = destinationPath.getFileName().toString();
 
             if (Files.exists(destinationPath)) {
-                byte[] existingBytes = Files.readAllBytes(destinationPath);
-                if (Arrays.equals(resourceBytes, existingBytes)) {
-                    // Content is already up-to-date
+                byte[] diskBytes = Files.readAllBytes(destinationPath);
+                String diskChecksum = computeSha256(diskBytes);
+
+                if (bundledChecksum.equalsIgnoreCase(diskChecksum)) {
+                    logInfo("✓ " + fileName + " integrity verified [SHA-256: " + bundledChecksum.substring(0, 16) + "...] (up-to-date).");
                     return false;
+                } else {
+                    logInfo("! Checksum mismatch for " + fileName + " (disk: " + diskChecksum.substring(0, 8) + "... != expected: " + bundledChecksum.substring(0, 8) + "...). Upgrading file...");
                 }
+            } else {
+                logInfo("+ Initial installation of " + fileName + " [SHA-256: " + bundledChecksum.substring(0, 16) + "]...");
             }
 
             Path parent = destinationPath.getParent();
@@ -123,11 +141,22 @@ public final class WebAssetAutoInstaller {
                 Files.createDirectories(parent);
             }
 
-            Files.write(destinationPath, resourceBytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            Files.write(destinationPath, bundledBytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            logInfo("✓ " + fileName + " written successfully [SHA-256: " + bundledChecksum + "].");
             return true;
         } catch (Exception e) {
-            logError("Failed to copy resource '" + resourcePath + "' to '" + destinationPath + "': " + e.getMessage(), e);
+            logError("Failed to verify/sync resource '" + resourcePath + "' to '" + destinationPath + "': " + e.getMessage(), e);
             return false;
+        }
+    }
+
+    private static String computeSha256(byte[] data) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(data);
+            return HexFormat.of().formatHex(hash);
+        } catch (Exception e) {
+            throw new IllegalStateException("SHA-256 MessageDigest is not available in current JVM", e);
         }
     }
 

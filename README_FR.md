@@ -138,8 +138,9 @@ Grâce à son installeur intégré autonome (**Zero-Config Drop-in**), **un seul
 1. Assurez-vous que votre serveur ou client solo dispose de **Minecraft 26.3**, de **NeoForge 26.3.0+**, de **Millénaire 9.1.0+** et de **BlueMap 5.11+ / 5.29**.
 2. Téléchargez le fichier `millenaire-bluemap-bridge-1.0.0.jar` depuis la page des [Releases](https://github.com/Q300Z/millenaire-bluemap-bridge/releases) et déposez-le dans le répertoire `mods/` de votre instance.
 3. **Lancez simplement Minecraft !**
-   - Le mod extrait automatiquement les composants Web (`millenaire_panel.js` et `millenaire_panel.css`) dans le dossier `bluemap/web/`.
-   - Le mod configure et décommente automatiquement votre fichier `config/bluemap/webapp.conf`.
+   - Au démarrage, le mod vérifie l'intégrité et la version des composants Web (`millenaire_panel.js` et `millenaire_panel.css`) via une comparaison d'empreinte **SHA-256 (Checksum)**.
+   - S'ils sont absents, corrompus ou issus d'une version antérieure, ils sont immédiatement extraits et mis à niveau dans `bluemap/web/`.
+   - Le mod configure et décommente automatiquement votre fichier `config/bluemap/webapp.conf` pour activer les scripts et styles.
 4. Ouvrez votre navigateur sur la carte BlueMap (`http://localhost:8100`) et effectuez un rafraîchissement forcé (`Ctrl + F5` ou `Cmd + Shift + R`).  
    **Le bouton `🏰 Villages` est immédiatement fonctionnel !**
 
