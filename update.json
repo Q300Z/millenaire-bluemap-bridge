@@ -1,11 +1,12 @@
 {
   "homepage": "https://github.com/Q300Z/millenaire-bluemap-bridge",
   "promos": {
-    "26.3-latest": "0.1.0",
-    "26.3-recommended": "0.1.0"
+    "26.3-latest": "0.1.1",
+    "26.3-recommended": "0.1.1"
   },
   "26.3": {
     "0.0.1": "Initialisation du mod bridge Millénaire 9.1.0 et BlueMap 5.29 pour Minecraft 26.3.",
-    "0.1.0": "Support intégral des 26 langues officielles de Millénaire et sélecteur multilingue dynamique BlueMap."
+    "0.1.0": "Support intégral des 26 langues officielles de Millénaire et sélecteur multilingue dynamique BlueMap.",
+    "0.1.1": "Mise à jour vers la version 0.1.1 pour Minecraft 26.3."
   }
 }
