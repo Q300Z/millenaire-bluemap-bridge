@@ -1,0 +1,48 @@
+# Build outputs & compilation artifacts
+build/
+bin/
+out/
+.gradle/
+*.class
+*.jar
+!libs/*.jar
+*.war
+*.ear
+*.nar
+
+# IDE & editor configurations
+.idea/
+*.iml
+*.ipr
+*.iws
+.settings/
+.project
+.classpath
+.factorypath
+.vscode/
+*.code-workspace
+*~
+*.swp
+.*.swp
+*.swo
+.*.swo
+*.kate-swp
+.*.kate-swp
+
+# OS generated files & caches
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Log files
+*.log
+hs_err_pid*.log
+replay_pid*.log
+
+# Internal orchestrator metadata
+PROJECT.md
+.agents/

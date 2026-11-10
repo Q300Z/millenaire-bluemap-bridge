@@ -1,0 +1,38 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+
+[[mods]]
+modId="millenaire_bluemap"
+version="1.0.0"
+displayName="Millénaire BlueMap Integration"
+authors="Q300Z"
+description='''Real-time 3D territorial zones, diplomatic networks, and interactive statistics for Millénaire 9.1.0 on BlueMap 5.29.'''
+
+[[dependencies.millenaire_bluemap]]
+    modId="neoforge"
+    type="required"
+    versionRange="[26.3.0,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.millenaire_bluemap]]
+    modId="minecraft"
+    type="required"
+    versionRange="[26.3,26.4)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.millenaire_bluemap]]
+    modId="millenaire"
+    type="required"
+    versionRange="[9.1.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+[[dependencies.millenaire_bluemap]]
+    modId="bluemap"
+    type="required"
+    versionRange="[5.29,)"
+    ordering="AFTER"
+    side="BOTH"
