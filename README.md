@@ -161,7 +161,7 @@ java -jar mods/millenaire-bluemap-bridge-1.0.0.jar
 
 If your environment uses a custom external web server (Nginx/Apache or static reverse proxy):
 
-1. Web asset sources are available in the repository `web/` folder or via the `millenaire-bluemap-web-assets-<version>.zip` release bundle.
+1. Web asset sources are available in the repository `web/` folder (or automatically extracted by the JAR).
 2. Copy `millenaire_panel.js` to `<webroot>/js/` and `millenaire_panel.css` to `<webroot>/css/`.
 3. Reference them in `config/bluemap/webapp.conf`:
    ```hocon

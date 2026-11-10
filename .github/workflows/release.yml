@@ -71,22 +71,16 @@ jobs:
           git commit -s -m "chore(release): mise à jour automatique de update.json vers v${VERSION} [skip ci]" || echo "Aucun changement dans update.json"
           git push origin main || echo "Push skipped or branch already up to date"
 
-      - name: Préparation et empaquetage des artefacts de release
+      - name: Préparation et empaquetage de l'artefact JAR unique
         if: steps.tag_version.outputs.new_tag != ''
         run: |
           mkdir -p dist
           VERSION="${{ steps.tag_version.outputs.new_version }}"
           TAG="${{ steps.tag_version.outputs.new_tag }}"
           
-          echo "Préparation de la version ${VERSION} (${TAG})..."
+          echo "Préparation du mod JAR autonome pour la version ${VERSION} (${TAG})..."
           
-          # 1. Empaquetage des assets Web BlueMap
-          zip -j dist/millenaire-bluemap-web-assets-${VERSION}.zip web/js/millenaire_panel.js web/css/millenaire_panel.css
-          cp web/js/millenaire_panel.js dist/millenaire_panel.js
-          cp web/css/millenaire_panel.css dist/millenaire_panel.css
-          cp update.json dist/update.json
-          
-          # 2. Empaquetage du binaire du mod jar
+          # Le JAR embarque déjà les assets web JS/CSS et l'installeur automatique SHA-256
           if [ -f "mods/millenaire-bluemap-bridge-1.0.0.jar" ]; then
             cp "mods/millenaire-bluemap-bridge-1.0.0.jar" "dist/millenaire-bluemap-bridge-${VERSION}.jar"
           elif [ -f "millenaire-bluemap-bridge-1.0.0.jar" ]; then
@@ -100,7 +94,7 @@ jobs:
             exit 1
           fi
           
-          echo "Artefacts prêts pour la release :"
+          echo "Artefact unique autonome prêt pour la release :"
           ls -la dist/
 
       - name: Publication de la GitHub Release
@@ -111,7 +105,7 @@ jobs:
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
           files: |
-            dist/*
+            dist/millenaire-bluemap-bridge-*.jar
           draft: false
           prerelease: false
         env:
