@@ -1,92 +1,272 @@
 #!/usr/bin/env bash
+# ==============================================================================
+# Build & Test Pipeline for Millénaire BlueMap Bridge
+#
+# Fully agnostic, portable build script for Linux, macOS, and Windows (WSL/Git Bash).
+# Automatically discovers JDK 25+, local Minecraft/NeoForge libraries, and mods.
+#
+# Author: Q300Z
+# ==============================================================================
 set -euo pipefail
 
-cd "$(dirname "$0")/.."
+# 1. Self-contained project directory resolution
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "${PROJECT_DIR}"
 
-SCRIPT_DIR="millenaire-bluemap-bridge"
-LIBS_DIR="${SCRIPT_DIR}/libs"
-BUILD_CLASSES="${SCRIPT_DIR}/build/classes"
-BUILD_TEST_CLASSES="${SCRIPT_DIR}/build/test-classes"
+LIBS_DIR="${PROJECT_DIR}/libs"
+BUILD_DIR="${PROJECT_DIR}/build"
+BUILD_CLASSES="${BUILD_DIR}/classes"
+BUILD_TEST_CLASSES="${BUILD_DIR}/test-classes"
+BUILD_OUTPUT_DIR="${BUILD_DIR}/libs"
 
-META_LIBS="/home/tboutin/.local/share/ModrinthApp/meta/libraries"
-
-if [ -d "/usr/lib/jvm/java-27-openjdk" ]; then
-    JAVA_HOME_DEFAULT="/usr/lib/jvm/java-27-openjdk"
-elif [ -n "${JAVA_HOME:-}" ]; then
-    JAVA_HOME_DEFAULT="$JAVA_HOME"
-else
-    JAVA_HOME_DEFAULT=""
-fi
-
-if [ -n "$JAVA_HOME_DEFAULT" ] && [ -x "$JAVA_HOME_DEFAULT/bin/javac" ]; then
-    JAVAC_BIN="$JAVA_HOME_DEFAULT/bin/javac"
-    JAVA_BIN="$JAVA_HOME_DEFAULT/bin/java"
-    JAR_BIN="$JAVA_HOME_DEFAULT/bin/jar"
-else
-    JAVAC_BIN="$(command -v javac)"
-    JAVA_BIN="$(command -v java)"
-    JAR_BIN="$(command -v jar)"
-fi
-
-find_lib() {
-    local base_dir="$1"
-    local pattern="$2"
-    local fallback="$3"
-    if [ -d "$base_dir" ]; then
-        local found
-        found="$(find "$base_dir" -name "$pattern" 2>/dev/null | sort -V | tail -n1)"
-        if [ -n "$found" ] && [ -f "$found" ]; then
-            echo "$found"
+# 2. Portable JDK 25+ Discovery
+get_jdk_version() {
+    local javac_bin="$1"
+    if [ -x "$javac_bin" ]; then
+        local ver_token
+        ver_token="$("$javac_bin" -version 2>&1 | grep -oE '[0-9]+' | head -1)"
+        if [ -n "$ver_token" ]; then
+            echo "$ver_token"
             return
         fi
     fi
-    echo "$fallback"
+    echo "0"
 }
 
-LOG4J_API_JAR="$(find_lib "${META_LIBS}/org/apache/logging/log4j/log4j-api" "log4j-api-*.jar" "${META_LIBS}/org/apache/logging/log4j/log4j-api/2.26.0/log4j-api-2.26.0.jar")"
-GSON_JAR="$(find_lib "${META_LIBS}/com/google/code/gson/gson" "gson-*.jar" "${META_LIBS}/com/google/code/gson/gson/2.14.0/gson-2.14.0.jar")"
-FASTUTIL_JAR="$(find_lib "${META_LIBS}/it/unimi/dsi/fastutil" "fastutil-*.jar" "${META_LIBS}/it/unimi/dsi/fastutil/8.5.18/fastutil-8.5.18.jar")"
+find_suitable_jdk() {
+    # a. Check user-defined JAVA_HOME
+    if [ -n "${JAVA_HOME:-}" ] && [ -x "${JAVA_HOME}/bin/javac" ]; then
+        local ver
+        ver="$(get_jdk_version "${JAVA_HOME}/bin/javac")"
+        if [ "$ver" -ge 25 ]; then
+            echo "${JAVA_HOME}"
+            return
+        fi
+    fi
 
-CP="mods/millenaire-9.1.0+mc26.3.jar:mods/bluemap-5.29-neoforge.jar:${LIBS_DIR}/flow-math-1.0.3.jar:${META_LIBS}/net/neoforged/minecraft-client-patched/26.3.0.102/minecraft-client-patched-26.3.0.102.jar:${META_LIBS}/net/neoforged/neoforge/26.3.0.102/neoforge-26.3.0.102-universal.jar:${META_LIBS}/net/neoforged/bus/8.0.5/bus-8.0.5.jar:${META_LIBS}/net/neoforged/fancymodloader/loader/12.0.12/loader-12.0.12.jar:${LOG4J_API_JAR}:${GSON_JAR}:${META_LIBS}/com/mojang/datafixerupper/10.0.21/datafixerupper-10.0.21.jar:${FASTUTIL_JAR}"
+    # b. Check system default javac in PATH
+    local sys_javac
+    sys_javac="$(command -v javac 2>/dev/null || true)"
+    if [ -n "$sys_javac" ] && [ -x "$sys_javac" ]; then
+        local ver
+        ver="$(get_jdk_version "$sys_javac")"
+        if [ "$ver" -ge 25 ]; then
+            echo "$(dirname "$(dirname "$sys_javac")")"
+            return
+        fi
+    fi
+
+    # c. Scan standard JVM installation paths across platforms
+    local search_paths=(
+        /usr/lib/jvm/*
+        /usr/java/*
+        /opt/java/*
+        /opt/jvm/*
+        /Library/Java/JavaVirtualMachines/*/Contents/Home
+        "${HOME}/Library/Java/JavaVirtualMachines/*/Contents/Home"
+        "${HOME}/.jdks/*"
+        "${HOME}/.sdkman/candidates/java/*"
+        "${HOME}/.asdf/installs/java/*"
+        "/c/Program Files/Java"/*
+        "/c/Program Files/Eclipse Adoptium"/*
+    )
+
+    local best_home=""
+    local best_ver=0
+
+    for candidate in "${search_paths[@]}"; do
+        if [ -d "$candidate" ] && [ -x "$candidate/bin/javac" ]; then
+            local ver
+            ver="$(get_jdk_version "$candidate/bin/javac")"
+            if [ "$ver" -ge 25 ] && [ "$ver" -gt "$best_ver" ]; then
+                best_ver="$ver"
+                best_home="$candidate"
+            fi
+        fi
+    done
+
+    echo "$best_home"
+}
+
+DETECTED_JAVA_HOME="$(find_suitable_jdk)"
+
+if [ -n "$DETECTED_JAVA_HOME" ] && [ -x "$DETECTED_JAVA_HOME/bin/javac" ]; then
+    JAVAC_BIN="$DETECTED_JAVA_HOME/bin/javac"
+    JAVA_BIN="$DETECTED_JAVA_HOME/bin/java"
+    JAR_BIN="$DETECTED_JAVA_HOME/bin/jar"
+else
+    echo "::error::Aucun JDK version 25 ou supérieure trouvé sur votre système." >&2
+    echo "Veuillez installer un JDK 25+ ou définir la variable JAVA_HOME." >&2
+    exit 1
+fi
+
+# 3. Dynamic Resolution of Mods and Libraries Directories
+find_meta_libs_dir() {
+    if [ -n "${MINECRAFT_LIBRARIES:-}" ] && [ -d "$MINECRAFT_LIBRARIES" ]; then
+        echo "$MINECRAFT_LIBRARIES"
+        return
+    fi
+    if [ -n "${MODRINTH_LIBRARIES:-}" ] && [ -d "$MODRINTH_LIBRARIES" ]; then
+        echo "$MODRINTH_LIBRARIES"
+        return
+    fi
+
+    local standard_locations=(
+        "${XDG_DATA_HOME:-$HOME/.local/share}/ModrinthApp/meta/libraries"
+        "$HOME/Library/Application Support/ModrinthApp/meta/libraries"
+        "${APPDATA:-}/ModrinthApp/meta/libraries"
+        "$HOME/.minecraft/libraries"
+        "${XDG_DATA_HOME:-$HOME/.local/share}/PrismLauncher/libraries"
+        "$HOME/.local/share/PrismLauncher/libraries"
+        "$HOME/.m2/repository"
+        "${LIBS_DIR}"
+    )
+
+    for loc in "${standard_locations[@]}"; do
+        if [ -n "$loc" ] && [ -d "$loc" ]; then
+            echo "$loc"
+            return
+        fi
+    done
+
+    echo "${LIBS_DIR}"
+}
+
+META_LIBS="$(find_meta_libs_dir)"
+
+MOD_SEARCH_DIRS=(
+    "${MODS_DIR:-}"
+    "${PROJECT_DIR}/../mods"
+    "${PROJECT_DIR}/mods"
+    "${LIBS_DIR}"
+)
+
+find_mod_jar() {
+    local pattern="$1"
+    for dir in "${MOD_SEARCH_DIRS[@]}"; do
+        if [ -n "$dir" ] && [ -d "$dir" ]; then
+            local match
+            match="$(find "$dir" -maxdepth 2 -name "$pattern" ! -name "*bridge*" 2>/dev/null | sort -V | tail -n1)"
+            if [ -n "$match" ] && [ -f "$match" ]; then
+                echo "$match"
+                return
+            fi
+        fi
+    done
+    echo ""
+}
+
+find_meta_lib() {
+    local pattern="$1"
+    if [ -d "$META_LIBS" ]; then
+        local match
+        match="$(find "$META_LIBS" -name "$pattern" 2>/dev/null | sort -V | tail -n1)"
+        if [ -n "$match" ] && [ -f "$match" ]; then
+            echo "$match"
+            return
+        fi
+    fi
+    if [ -d "$LIBS_DIR" ]; then
+        local match
+        match="$(find "$LIBS_DIR" -name "$pattern" 2>/dev/null | sort -V | tail -n1)"
+        if [ -n "$match" ] && [ -f "$match" ]; then
+            echo "$match"
+            return
+        fi
+    fi
+    echo ""
+}
+
+MILLENAIRE_JAR="$(find_mod_jar "millenaire-*.jar")"
+BLUEMAP_JAR="$(find_mod_jar "bluemap-*.jar")"
+
+# Dynamic Resolution of NeoForge & Core Libraries
+FLOW_MATH_JAR="${LIBS_DIR}/flow-math-1.0.3.jar"
+MC_PATCHED_JAR="$(find_meta_lib "*minecraft-client-patched*.jar")"
+NEOFORGE_JAR="$(find_meta_lib "*neoforge*universal*.jar")"
+BUS_JAR="$(find_meta_lib "*bus*.jar")"
+FML_LOADER_JAR="$(find_meta_lib "*loader*.jar")"
+LOG4J_API_JAR="$(find_meta_lib "*log4j-api*.jar")"
+LOG4J_CORE_JAR="$(find_meta_lib "*log4j-core*.jar")"
+GSON_JAR="$(find_meta_lib "*gson*.jar")"
+FASTUTIL_JAR="$(find_meta_lib "*fastutil*.jar")"
+DFU_JAR="$(find_meta_lib "*datafixerupper*.jar")"
+
+# Build Classpath dynamically (joining only non-empty elements)
+CP_ELEMENTS=(
+    "$MILLENAIRE_JAR"
+    "$BLUEMAP_JAR"
+    "$FLOW_MATH_JAR"
+    "$MC_PATCHED_JAR"
+    "$NEOFORGE_JAR"
+    "$BUS_JAR"
+    "$FML_LOADER_JAR"
+    "$LOG4J_API_JAR"
+    "$GSON_JAR"
+    "$DFU_JAR"
+    "$FASTUTIL_JAR"
+)
+
+CP=""
+for elem in "${CP_ELEMENTS[@]}"; do
+    if [ -n "$elem" ]; then
+        if [ -z "$CP" ]; then
+            CP="$elem"
+        else
+            CP="${CP}:${elem}"
+        fi
+    fi
+done
 
 ensure_dependencies() {
-    mkdir -p "${LIBS_DIR}" "${BUILD_CLASSES}" "${BUILD_TEST_CLASSES}"
-    if [ ! -f "${LIBS_DIR}/flow-math-1.0.3.jar" ]; then
-        python3 -c '
-import zipfile
-with zipfile.ZipFile("mods/bluemap-5.29-neoforge.jar", "r") as z:
-    open("'"${LIBS_DIR}"'/flow-math-1.0.3.jar", "wb").write(z.read("META-INF/jarjar/flow-math-1.0.3.jar"))
-'
+    mkdir -p "${LIBS_DIR}" "${BUILD_CLASSES}" "${BUILD_TEST_CLASSES}" "${BUILD_OUTPUT_DIR}"
+    
+    # If flow-math is missing from libs, extract it automatically from BlueMap JAR without requiring python
+    if [ ! -f "${FLOW_MATH_JAR}" ] && [ -n "${BLUEMAP_JAR}" ] && [ -f "${BLUEMAP_JAR}" ]; then
+        local tmp_extract
+        tmp_extract="$(mktemp -d)"
+        (
+            cd "$tmp_extract"
+            "$JAR_BIN" xf "${BLUEMAP_JAR}" "META-INF/jarjar/flow-math-1.0.3.jar" 2>/dev/null || true
+            if [ -f "META-INF/jarjar/flow-math-1.0.3.jar" ]; then
+                mv "META-INF/jarjar/flow-math-1.0.3.jar" "${FLOW_MATH_JAR}"
+            fi
+        )
+        rm -rf "$tmp_extract"
     fi
 }
 
 compile_main() {
     ensure_dependencies
     echo "Compiling main Java sources (--release 25)..."
+    mapfile -t MAIN_SOURCES < <(find "${PROJECT_DIR}/src/main/java" -name "*.java")
     "$JAVAC_BIN" --release 25 -encoding UTF-8 \
       -cp "$CP" \
       -d "${BUILD_CLASSES}" \
-      $(find "${SCRIPT_DIR}/src/main/java" -name "*.java")
+      "${MAIN_SOURCES[@]}"
 
     echo "Copying main resources..."
-    cp -r "${SCRIPT_DIR}/src/main/resources/"* "${BUILD_CLASSES}/"
+    cp -a "${PROJECT_DIR}/src/main/resources/." "${BUILD_CLASSES}/"
 }
 
 run_tests() {
     echo "Compiling test Java sources..."
     mkdir -p "${BUILD_TEST_CLASSES}"
-    TEST_CP="${BUILD_CLASSES}:$CP"
+    local test_cp="${BUILD_CLASSES}:$CP"
 
+    mapfile -t TEST_SOURCES < <(find "${PROJECT_DIR}/src/test/java" -name "*.java")
     "$JAVAC_BIN" --release 25 -encoding UTF-8 \
-      -cp "$TEST_CP" \
+      -cp "$test_cp" \
       -d "${BUILD_TEST_CLASSES}" \
-      $(find "${SCRIPT_DIR}/src/test/java" -name "*.java")
+      "${TEST_SOURCES[@]}"
 
     echo "Executing TranslationValidationTest..."
-    LOG4J_CORE="$(find_lib "${META_LIBS}/org/apache/logging/log4j/log4j-core" "log4j-core-*.jar" "${META_LIBS}/org/apache/logging/log4j/log4j-core/2.26.0/log4j-core-2.26.0.jar")"
-    RUN_TEST_CP="${BUILD_TEST_CLASSES}:${BUILD_CLASSES}:$CP:${LOG4J_CORE}"
+    local run_test_cp="${BUILD_TEST_CLASSES}:${BUILD_CLASSES}:$CP"
+    if [ -n "$LOG4J_CORE_JAR" ]; then
+        run_test_cp="${run_test_cp}:${LOG4J_CORE_JAR}"
+    fi
 
-    "$JAVA_BIN" -cp "$RUN_TEST_CP" org.millenaire.bridge.test.TranslationValidationTest
+    "$JAVA_BIN" -cp "$run_test_cp" org.millenaire.bridge.test.TranslationValidationTest
 }
 
 package_jar() {
@@ -100,9 +280,20 @@ Implementation-Version: 1.0.0
 Implementation-Vendor: Q300Z
 EOF
 
-    "$JAR_BIN" cfm mods/millenaire-bluemap-bridge-1.0.0.jar "${BUILD_CLASSES}/META-INF/MANIFEST.MF" -C "${BUILD_CLASSES}" .
-    cp mods/millenaire-bluemap-bridge-1.0.0.jar "${LIBS_DIR}/millenaire-bluemap-bridge-1.0.0.jar"
-    echo "Built mods/millenaire-bluemap-bridge-1.0.0.jar successfully."
+    local target_jar="${BUILD_OUTPUT_DIR}/millenaire-bluemap-bridge-1.0.0.jar"
+    "$JAR_BIN" cfm "${target_jar}" "${BUILD_CLASSES}/META-INF/MANIFEST.MF" -C "${BUILD_CLASSES}" .
+    
+    # Mirror into libs/ for CI release workflow
+    cp "${target_jar}" "${LIBS_DIR}/millenaire-bluemap-bridge-1.0.0.jar"
+    
+    # Mirror into Minecraft instance mods/ directory if present
+    if [ -n "${MODS_DIR:-}" ] && [ -d "${MODS_DIR}" ]; then
+        cp "${target_jar}" "${MODS_DIR}/millenaire-bluemap-bridge-1.0.0.jar"
+    elif [ -d "${PROJECT_DIR}/../mods" ]; then
+        cp "${target_jar}" "${PROJECT_DIR}/../mods/millenaire-bluemap-bridge-1.0.0.jar"
+    fi
+
+    echo "Built ${target_jar} successfully."
 }
 
 ACTION="${1:-build}"
@@ -119,7 +310,7 @@ case "$ACTION" in
         ;;
     clean)
         echo "Cleaning build directory..."
-        rm -rf "${SCRIPT_DIR}/build"
+        rm -rf "${BUILD_DIR}"
         echo "Cleaned successfully."
         ;;
     help|-h|--help)
