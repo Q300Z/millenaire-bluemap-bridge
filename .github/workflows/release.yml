@@ -8,6 +8,7 @@ on:
       - '**.md'
       - 'docs/**'
       - '.gitignore'
+      - 'update.json'
   workflow_dispatch:
 
 permissions:
@@ -39,6 +40,36 @@ jobs:
           tag_prefix: v
           release_branches: main
 
+      - name: Mise à jour automatique de update.json (NeoForge Update Checker)
+        run: |
+          VERSION="${{ steps.tag_version.outputs.new_version }}"
+          echo "Mise à jour de update.json vers la version ${VERSION}..."
+          
+          python3 -c "
+          import json
+          with open('update.json', 'r', encoding='utf-8') as f:
+              data = json.load(f)
+          
+          if 'promos' not in data:
+              data['promos'] = {}
+          data['promos']['26.3-latest'] = '${VERSION}'
+          data['promos']['26.3-recommended'] = '${VERSION}'
+          
+          if '26.3' not in data:
+              data['26.3'] = {}
+          data['26.3']['${VERSION}'] = 'Mise à jour vers la version ${VERSION} pour Minecraft 26.3.'
+          
+          with open('update.json', 'w', encoding='utf-8') as f:
+              json.dump(data, f, indent=2, ensure_ascii=False)
+              f.write('\n')
+          "
+          
+          git config user.name "Q300Z"
+          git config user.email "Q300Zhomas@gmail.com"
+          git add update.json
+          git commit -s -m "chore(release): mise à jour automatique de update.json vers v${VERSION} [skip ci]" || echo "Aucun changement dans update.json"
+          git push origin main || echo "Push skipped or branch already up to date"
+
       - name: Préparation et empaquetage des artefacts de release
         run: |
           mkdir -p dist
@@ -51,6 +82,7 @@ jobs:
           zip -j dist/millenaire-bluemap-web-assets-${VERSION}.zip web/js/millenaire_panel.js web/css/millenaire_panel.css
           cp web/js/millenaire_panel.js dist/millenaire_panel.js
           cp web/css/millenaire_panel.css dist/millenaire_panel.css
+          cp update.json dist/update.json
           
           # 2. Empaquetage du binaire du mod jar
           if [ -f "mods/millenaire-bluemap-bridge-1.0.0.jar" ]; then

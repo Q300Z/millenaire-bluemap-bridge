@@ -7,6 +7,8 @@ modId="millenaire_bluemap"
 version="1.0.0"
 displayName="Millénaire BlueMap Integration"
 authors="Q300Z"
+displayURL="https://github.com/Q300Z/millenaire-bluemap-bridge"
+updateJSONURL="https://raw.githubusercontent.com/Q300Z/millenaire-bluemap-bridge/main/update.json"
 description='''Real-time 3D territorial zones, diplomatic networks, and interactive statistics for Millénaire 9.1.0 on BlueMap 5.29.'''
 
 [[dependencies.millenaire_bluemap]]
