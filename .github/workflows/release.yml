@@ -65,10 +65,12 @@ jobs:
               f.write('\n')
           "
           
+          echo "${VERSION}" > version.txt
+          
           git config user.name "Q300Z"
           git config user.email "Q300Zhomas@gmail.com"
-          git add update.json
-          git commit -s -m "chore(release): mise à jour automatique de update.json vers v${VERSION} [skip ci]" || echo "Aucun changement dans update.json"
+          git add update.json version.txt
+          git commit -s -m "chore(release): mise à jour automatique de update.json et version.txt vers v${VERSION} [skip ci]" || echo "Aucun changement"
           git push origin main || echo "Push skipped or branch already up to date"
 
       - name: Préparation et empaquetage de l'artefact JAR unique
@@ -80,13 +82,9 @@ jobs:
           
           echo "Préparation du mod JAR autonome pour la version ${VERSION} (${TAG})..."
           
-          # Le JAR embarque déjà les assets web JS/CSS et l'installeur automatique SHA-256
-          if [ -f "mods/millenaire-bluemap-bridge-1.0.0.jar" ]; then
-            cp "mods/millenaire-bluemap-bridge-1.0.0.jar" "dist/millenaire-bluemap-bridge-${VERSION}.jar"
-          elif [ -f "millenaire-bluemap-bridge-1.0.0.jar" ]; then
-            cp "millenaire-bluemap-bridge-1.0.0.jar" "dist/millenaire-bluemap-bridge-${VERSION}.jar"
-          elif [ -f "libs/millenaire-bluemap-bridge-1.0.0.jar" ]; then
-            cp "libs/millenaire-bluemap-bridge-1.0.0.jar" "dist/millenaire-bluemap-bridge-${VERSION}.jar"
+          FOUND_JAR="$(find build/libs libs mods . -maxdepth 2 -name "millenaire-bluemap-bridge-*.jar" 2>/dev/null | sort -V | tail -n1)"
+          if [ -n "$FOUND_JAR" ] && [ -f "$FOUND_JAR" ]; then
+            cp "$FOUND_JAR" "dist/millenaire-bluemap-bridge-${VERSION}.jar"
           fi
           
           if [ ! -f "dist/millenaire-bluemap-bridge-${VERSION}.jar" ]; then

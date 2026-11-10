@@ -4,7 +4,7 @@ license="MIT"
 
 [[mods]]
 modId="millenaire_bluemap"
-version="1.0.0"
+version="0.1.0"
 displayName="Millénaire BlueMap Integration"
 authors="Q300Z"
 displayURL="https://github.com/Q300Z/millenaire-bluemap-bridge"

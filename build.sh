@@ -13,6 +13,9 @@ set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${PROJECT_DIR}"
 
+VERSION="$(cat "${PROJECT_DIR}/version.txt" 2>/dev/null || echo "0.1.0")"
+VERSION="${VERSION//[[:space:]]/}"
+
 LIBS_DIR="${PROJECT_DIR}/libs"
 BUILD_DIR="${PROJECT_DIR}/build"
 BUILD_CLASSES="${BUILD_DIR}/classes"
@@ -238,7 +241,7 @@ ensure_dependencies() {
 
 compile_main() {
     ensure_dependencies
-    echo "Compiling main Java sources (--release 25)..."
+    echo "Compiling main Java sources (--release 25, version: ${VERSION})..."
     mapfile -t MAIN_SOURCES < <(find "${PROJECT_DIR}/src/main/java" -name "*.java")
     "$JAVAC_BIN" --release 25 -encoding UTF-8 \
       -cp "$CP" \
@@ -247,6 +250,11 @@ compile_main() {
 
     echo "Copying main resources..."
     cp -a "${PROJECT_DIR}/src/main/resources/." "${BUILD_CLASSES}/"
+
+    # Inject version into neoforge.mods.toml
+    if [ -f "${BUILD_CLASSES}/META-INF/neoforge.mods.toml" ]; then
+        sed -i "s/version=\"[^\"]*\"/version=\"${VERSION}\"/g" "${BUILD_CLASSES}/META-INF/neoforge.mods.toml"
+    fi
 }
 
 run_tests() {
@@ -270,27 +278,30 @@ run_tests() {
 }
 
 package_jar() {
-    echo "Packaging mod JAR..."
+    echo "Packaging mod JAR (version ${VERSION})..."
     mkdir -p "${BUILD_CLASSES}/META-INF"
-    cat << 'EOF' > "${BUILD_CLASSES}/META-INF/MANIFEST.MF"
+    cat << EOF > "${BUILD_CLASSES}/META-INF/MANIFEST.MF"
 Manifest-Version: 1.0
 Main-Class: org.millenaire.bridge.installer.WebAssetAutoInstaller
 Implementation-Title: Millenaire BlueMap Bridge
-Implementation-Version: 1.0.0
+Implementation-Version: ${VERSION}
 Implementation-Vendor: Q300Z
 EOF
 
-    local target_jar="${BUILD_OUTPUT_DIR}/millenaire-bluemap-bridge-1.0.0.jar"
+    local target_jar="${BUILD_OUTPUT_DIR}/millenaire-bluemap-bridge-${VERSION}.jar"
     "$JAR_BIN" cfm "${target_jar}" "${BUILD_CLASSES}/META-INF/MANIFEST.MF" -C "${BUILD_CLASSES}" .
     
     # Mirror into libs/ for CI release workflow
-    cp "${target_jar}" "${LIBS_DIR}/millenaire-bluemap-bridge-1.0.0.jar"
+    rm -f "${LIBS_DIR}"/millenaire-bluemap-bridge-*.jar
+    cp "${target_jar}" "${LIBS_DIR}/millenaire-bluemap-bridge-${VERSION}.jar"
     
     # Mirror into Minecraft instance mods/ directory if present
     if [ -n "${MODS_DIR:-}" ] && [ -d "${MODS_DIR}" ]; then
-        cp "${target_jar}" "${MODS_DIR}/millenaire-bluemap-bridge-1.0.0.jar"
+        rm -f "${MODS_DIR}"/millenaire-bluemap-bridge-*.jar
+        cp "${target_jar}" "${MODS_DIR}/millenaire-bluemap-bridge-${VERSION}.jar"
     elif [ -d "${PROJECT_DIR}/../mods" ]; then
-        cp "${target_jar}" "${PROJECT_DIR}/../mods/millenaire-bluemap-bridge-1.0.0.jar"
+        rm -f "${PROJECT_DIR}/../mods"/millenaire-bluemap-bridge-*.jar
+        cp "${target_jar}" "${PROJECT_DIR}/../mods/millenaire-bluemap-bridge-${VERSION}.jar"
     fi
 
     echo "Built ${target_jar} successfully."
