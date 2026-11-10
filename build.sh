@@ -28,7 +28,26 @@ else
     JAR_BIN="$(command -v jar)"
 fi
 
-CP="mods/millenaire-9.1.0+mc26.3.jar:mods/bluemap-5.29-neoforge.jar:${LIBS_DIR}/flow-math-1.0.3.jar:${META_LIBS}/net/neoforged/minecraft-client-patched/26.3.0.102/minecraft-client-patched-26.3.0.102.jar:${META_LIBS}/net/neoforged/neoforge/26.3.0.102/neoforge-26.3.0.102-universal.jar:${META_LIBS}/net/neoforged/bus/8.0.5/bus-8.0.5.jar:${META_LIBS}/net/neoforged/fancymodloader/loader/12.0.12/loader-12.0.12.jar:${META_LIBS}/org/apache/logging/log4j/log4j-api/2.26.0/log4j-api-2.26.0.jar:${META_LIBS}/com/google/code/gson/gson/2.14.0/gson-2.14.0.jar:${META_LIBS}/com/mojang/datafixerupper/10.0.21/datafixerupper-10.0.21.jar:${META_LIBS}/it/unimi/dsi/fastutil/8.5.18/fastutil-8.5.18.jar"
+find_lib() {
+    local base_dir="$1"
+    local pattern="$2"
+    local fallback="$3"
+    if [ -d "$base_dir" ]; then
+        local found
+        found="$(find "$base_dir" -name "$pattern" 2>/dev/null | sort -V | tail -n1)"
+        if [ -n "$found" ] && [ -f "$found" ]; then
+            echo "$found"
+            return
+        fi
+    fi
+    echo "$fallback"
+}
+
+LOG4J_API_JAR="$(find_lib "${META_LIBS}/org/apache/logging/log4j/log4j-api" "log4j-api-*.jar" "${META_LIBS}/org/apache/logging/log4j/log4j-api/2.26.0/log4j-api-2.26.0.jar")"
+GSON_JAR="$(find_lib "${META_LIBS}/com/google/code/gson/gson" "gson-*.jar" "${META_LIBS}/com/google/code/gson/gson/2.14.0/gson-2.14.0.jar")"
+FASTUTIL_JAR="$(find_lib "${META_LIBS}/it/unimi/dsi/fastutil" "fastutil-*.jar" "${META_LIBS}/it/unimi/dsi/fastutil/8.5.18/fastutil-8.5.18.jar")"
+
+CP="mods/millenaire-9.1.0+mc26.3.jar:mods/bluemap-5.29-neoforge.jar:${LIBS_DIR}/flow-math-1.0.3.jar:${META_LIBS}/net/neoforged/minecraft-client-patched/26.3.0.102/minecraft-client-patched-26.3.0.102.jar:${META_LIBS}/net/neoforged/neoforge/26.3.0.102/neoforge-26.3.0.102-universal.jar:${META_LIBS}/net/neoforged/bus/8.0.5/bus-8.0.5.jar:${META_LIBS}/net/neoforged/fancymodloader/loader/12.0.12/loader-12.0.12.jar:${LOG4J_API_JAR}:${GSON_JAR}:${META_LIBS}/com/mojang/datafixerupper/10.0.21/datafixerupper-10.0.21.jar:${FASTUTIL_JAR}"
 
 ensure_dependencies() {
     mkdir -p "${LIBS_DIR}" "${BUILD_CLASSES}" "${BUILD_TEST_CLASSES}"
@@ -64,7 +83,7 @@ run_tests() {
       $(find "${SCRIPT_DIR}/src/test/java" -name "*.java")
 
     echo "Executing TranslationValidationTest..."
-    LOG4J_CORE="${META_LIBS}/org/apache/logging/log4j/log4j-core/2.26.0/log4j-core-2.26.0.jar"
+    LOG4J_CORE="$(find_lib "${META_LIBS}/org/apache/logging/log4j/log4j-core" "log4j-core-*.jar" "${META_LIBS}/org/apache/logging/log4j/log4j-core/2.26.0/log4j-core-2.26.0.jar")"
     RUN_TEST_CP="${BUILD_TEST_CLASSES}:${BUILD_CLASSES}:$CP:${LOG4J_CORE}"
 
     "$JAVA_BIN" -cp "$RUN_TEST_CP" org.millenaire.bridge.test.TranslationValidationTest
