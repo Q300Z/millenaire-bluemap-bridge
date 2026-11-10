@@ -1,0 +1,78 @@
+name: Publication de Release
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Création de Release & Montée de Version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupération du code source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configuration de Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '25'
+
+      - name: Montée de version automatique & tag SemVer
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+          tag_prefix: v
+          release_branches: main
+
+      - name: Préparation et empaquetage des artefacts de release
+        run: |
+          mkdir -p dist
+          VERSION="${{ steps.tag_version.outputs.new_version }}"
+          TAG="${{ steps.tag_version.outputs.new_tag }}"
+          
+          echo "Préparation de la version ${VERSION} (${TAG})..."
+          
+          # 1. Empaquetage des assets Web BlueMap
+          zip -j dist/millenaire-bluemap-web-assets-${VERSION}.zip web/js/millenaire_panel.js web/css/millenaire_panel.css
+          cp web/js/millenaire_panel.js dist/millenaire_panel.js
+          cp web/css/millenaire_panel.css dist/millenaire_panel.css
+          
+          # 2. Empaquetage du binaire du mod jar
+          if [ -f "mods/millenaire-bluemap-bridge-1.0.0.jar" ]; then
+            cp "mods/millenaire-bluemap-bridge-1.0.0.jar" "dist/millenaire-bluemap-bridge-${VERSION}.jar"
+          elif [ -f "millenaire-bluemap-bridge-1.0.0.jar" ]; then
+            cp "millenaire-bluemap-bridge-1.0.0.jar" "dist/millenaire-bluemap-bridge-${VERSION}.jar"
+          elif [ -f "libs/millenaire-bluemap-bridge-1.0.0.jar" ]; then
+            cp "libs/millenaire-bluemap-bridge-1.0.0.jar" "dist/millenaire-bluemap-bridge-${VERSION}.jar"
+          fi
+          
+          echo "Artefacts prêts pour la release :"
+          ls -la dist/
+
+      - name: Publication de la GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+          files: |
+            dist/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

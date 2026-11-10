@@ -1,0 +1,38 @@
+# Configuration Dependabot pour Millénaire BlueMap Bridge
+# Documentation: https://docs.github.com/fr/code-security/dependabot
+
+version: 2
+updates:
+  # 1. Surveillance des GitHub Actions (sécurité & CVE des workflows)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "security"
+    commit-message:
+      prefix: "ci(deps)"
+      include: "scope"
+
+  # 2. Analyse des dépendances Java (détection CVE et alertes de vulnérabilité)
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "java"
+      - "security"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
