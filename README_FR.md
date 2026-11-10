@@ -211,10 +211,16 @@ Le mod fonctionne parfaitement dans les deux configurations :
 
 ```
 millenaire-bluemap-bridge/
+├── .github/
+│   ├── dependabot.yml            # Surveillance CVE & mises à jour automatiques
+│   └── workflows/
+│       └── release.yml           # Pipeline CI/CD SemVer & publication GitHub Releases
 ├── .gitignore                    # Règles d'exclusion Git pour NeoForge, Java et IDEs
-├── LICENSE                       # Licence open-source MIT
+├── LICENSE                       # Licence open-source MIT (Copyright 2026 Q300Z)
+├── pom.xml                       # Manifest Maven pour analyse CVE Dependabot
 ├── README.md                     # Documentation exhaustive en langue anglaise
 ├── README_FR.md                  # Documentation exhaustive en langue française
+├── update.json                   # Métadonnées NeoForge Update Checker temps réel
 ├── build.sh                      # Script de compilation autonome
 ├── docs/
 │   └── screenshots/              # Captures d'écran officielles en haute définition
@@ -222,23 +228,28 @@ millenaire-bluemap-bridge/
 │       ├── city_list.png         # Tiroir déroulant de l'annuaire interactif
 │       └── overview.png          # Vue d'ensemble 3D et liaisons diplomatiques
 ├── libs/
-│   └── flow-math-1.0.3.jar       # Bibliothèque de calcul vectoriel
+│   ├── flow-math-1.0.3.jar       # Bibliothèque de calcul vectoriel
+│   └── millenaire-bluemap-bridge-1.0.0.jar # Mod compilé prêt à l'emploi
 ├── src/
 │   └── main/
 │       ├── java/org/millenaire/bridge/
 │       │   ├── MillenaireBridgeMod.java
-│       │   ├── BlueMapIntegrationService.java
-│       │   ├── VillageDataExtractor.java
-│       │   ├── AtomicJsonExporter.java
-│       │   ├── VillageZoneMarkerBuilder.java
-│       │   ├── DiplomaticLineMarkerBuilder.java
-│       │   └── VillageCenterMarkerBuilder.java
-│       └── resources/META-INF/neoforge.mods.toml
-└── web/
-    ├── css/
-    │   └── millenaire_panel.css  # Feuille de styles moderne avec variables CSS
-    └── js/
-        └── millenaire_panel.js   # Logique interactive et intégration à BlueMap
+│       │   ├── bluemap/
+│       │   │   ├── BlueMapIntegrationService.java
+│       │   │   └── markers/
+│       │   ├── dto/              # Modèles de données (Villages, Bâtiments, etc.)
+│       │   ├── exporter/         # Sérialisation atomique disque sans blocage
+│       │   ├── extractor/        # Extraction mémoire ultra-rapide (<0.15ms)
+│       │   ├── installer/        # Auto-installeur d'assets & Checksum SHA-256
+│       │   └── util/             # Traduction et résolution de lore
+│       └── resources/
+│           ├── META-INF/neoforge.mods.toml
+│           └── web/              # Assets web embarqués dans le JAR
+│               ├── css/millenaire_panel.css
+│               └── js/millenaire_panel.js
+└── web/                          # Sources de référence du frontend BlueMap
+    ├── css/millenaire_panel.css  # Styles modernes, tokens CSS et responsive
+    └── js/millenaire_panel.js    # Contrôleur d'interface, annuaire et inspecteur
 ```
 
 ---

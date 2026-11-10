@@ -211,10 +211,16 @@ It works seamlessly in both:
 
 ```
 millenaire-bluemap-bridge/
+├── .github/
+│   ├── dependabot.yml            # CVE monitoring & weekly dependency updates
+│   └── workflows/
+│       └── release.yml           # CI/CD SemVer tagging & GitHub Releases pipeline
 ├── .gitignore                    # NeoForge, Java, and IDE ignore rules
-├── LICENSE                       # MIT License
+├── LICENSE                       # MIT License (Copyright 2026 Q300Z)
+├── pom.xml                       # Maven manifest for Dependabot vulnerability audit
 ├── README.md                     # Comprehensive English documentation
 ├── README_FR.md                  # Comprehensive French documentation
+├── update.json                   # Real-time NeoForge Update Checker metadata
 ├── build.sh                      # Standalone compiler script
 ├── docs/
 │   └── screenshots/              # Official WebGL in-game screenshots
@@ -222,23 +228,28 @@ millenaire-bluemap-bridge/
 │       ├── city_list.png         # Interactive directory drawer
 │       └── overview.png          # 3D territory and diplomatic lines overview
 ├── libs/
-│   └── flow-math-1.0.3.jar       # Vector math dependency
+│   ├── flow-math-1.0.3.jar       # Vector math dependency
+│   └── millenaire-bluemap-bridge-1.0.0.jar # Pre-compiled standalone mod binary
 ├── src/
 │   └── main/
 │       ├── java/org/millenaire/bridge/
 │       │   ├── MillenaireBridgeMod.java
-│       │   ├── BlueMapIntegrationService.java
-│       │   ├── VillageDataExtractor.java
-│       │   ├── AtomicJsonExporter.java
-│       │   ├── VillageZoneMarkerBuilder.java
-│       │   ├── DiplomaticLineMarkerBuilder.java
-│       │   └── VillageCenterMarkerBuilder.java
-│       └── resources/META-INF/neoforge.mods.toml
-└── web/
-    ├── css/
-    │   └── millenaire_panel.css  # Modern UI stylesheet with CSS variables
-    └── js/
-        └── millenaire_panel.js   # Interactive UI logic & BlueMap hook
+│       │   ├── bluemap/
+│       │   │   ├── BlueMapIntegrationService.java
+│       │   │   └── markers/
+│       │   ├── dto/              # Data Transfer Objects (Villages, Buildings, etc.)
+│       │   ├── exporter/         # Atomic non-blocking disk JSON export
+│       │   ├── extractor/        # Sub-0.15ms in-memory cache extraction
+│       │   ├── installer/        # Standalone web asset installer & SHA-256 checksum
+│       │   └── util/             # Item translation and lore resolution
+│       └── resources/
+│           ├── META-INF/neoforge.mods.toml
+│           └── web/              # Embedded web assets packaged inside the JAR
+│               ├── css/millenaire_panel.css
+│               └── js/millenaire_panel.js
+└── web/                          # Frontend reference source files
+    ├── css/millenaire_panel.css  # Modern UI stylesheet with CSS tokens
+    └── js/millenaire_panel.js    # Interactive UI controller, directory & inspector
 ```
 
 ---

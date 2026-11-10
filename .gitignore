@@ -1,5 +1,6 @@
 # Build outputs & compilation artifacts
 build/
+dist/
 bin/
 out/
 .gradle/
